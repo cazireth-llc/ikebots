@@ -10,7 +10,7 @@ namespace ai
 
 	class FleePoint {
 	public:
-		FleePoint(PlayerbotAI* ai, float x, float y, float z) : ai(ai), sumDistance(0.0f), minDistance(0.0f) {
+        FleePoint(PlayerbotAI* ai, float x, float y, float z) : ai(ai), sumDistance(0.0f), minDistance(0.0f) {
 			this->x = x;
 			this->y = y;
 			this->z = z;
@@ -21,26 +21,26 @@ namespace ai
 		float y;
 		float z;
 
-		float sumDistance;
-		float minDistance;
+        float sumDistance;
+        float minDistance;
 
-	private:
-		PlayerbotAI* ai;
+    private:
+        PlayerbotAI* ai;
 	};
 
 	class FleeManager
 	{
 	public:
-		FleeManager(Player* bot, float maxAllowedDistance, float followAngle, bool forceMaxDistance = false) {
+        FleeManager(Player* bot, float maxAllowedDistance, float followAngle, bool forceMaxDistance = false) {
 			this->bot = bot;
 			this->maxAllowedDistance = maxAllowedDistance;
 			this->followAngle = followAngle;
-			this->forceMaxDistance = forceMaxDistance;
+            this->forceMaxDistance = forceMaxDistance;
 		}
 
 	public:
 		bool CalculateDestination(float* rx, float* ry, float* rz);
-		bool isUseful();
+        bool isUseful();
 
 	private:
 		void calculatePossibleDestinations(list<FleePoint*> &points);
@@ -53,7 +53,7 @@ namespace ai
 		Player* bot;
 		float maxAllowedDistance;
 		float followAngle;
-		bool forceMaxDistance;
+        bool forceMaxDistance;
 	};
 
 };

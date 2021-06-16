@@ -19,7 +19,7 @@ namespace ai
     public:
         DpsAoeStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
         virtual string getName() { return "dps aoe"; }
-		virtual int GetType() { return STRATEGY_TYPE_DPS; }
+        virtual int GetType() { return STRATEGY_TYPE_DPS; }
 
     public:
         virtual void InitTriggers(std::list<TriggerNode*> &triggers);

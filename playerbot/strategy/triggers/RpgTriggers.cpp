@@ -7,7 +7,7 @@ using namespace ai;
 
 bool NoRpgTargetTrigger::IsActive()
 {
-    return !context->GetValue<ObjectGuid>("rpg target")->Get() && !AI_VALUE(list<ObjectGuid>, "possible rpg targets").empty();
+    return !context->GetValue<ObjectGuid>("rpg target")->Get();
 }
 
 bool FarFromRpgTargetTrigger::IsActive()
@@ -16,5 +16,18 @@ bool FarFromRpgTargetTrigger::IsActive()
     if (!unit) return false;
 
     float distance = AI_VALUE2(float, "distance", "rpg target");
+	if (sPlayerbotAIConfig.RandombotsWalkingRPGInDoors)
+	{
+#ifdef CMANGOS
+		if (!bot->GetTerrain()->IsOutdoors(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()))
+#endif
+#ifdef MANGOS
+		if (!bot->GetMap()->GetTerrain()->IsOutdoors(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()))
+#endif
+
+		{
+            bot->m_movementInfo.AddMovementFlag(MOVEFLAG_WALK_MODE);
+		}
+	}
     return distance > sPlayerbotAIConfig.followDistance;
 }

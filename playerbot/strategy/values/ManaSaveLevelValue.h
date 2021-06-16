@@ -10,6 +10,5 @@ namespace ai
 
         virtual string Save() { ostringstream out; out << value; return out.str(); }
         virtual bool Load(string text) { value = atof(text.c_str()); return true; }
-
     };
 }

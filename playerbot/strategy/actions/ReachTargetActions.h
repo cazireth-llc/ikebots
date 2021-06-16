@@ -16,7 +16,7 @@ namespace ai
         }
         virtual bool Execute(Event event)
 		{
-			return MoveTo(AI_VALUE(Unit*, GetTargetName()), distance);
+            return MoveTo(AI_VALUE(Unit*, GetTargetName()), distance);
         }
         virtual bool isUseful()
 		{
@@ -57,7 +57,7 @@ namespace ai
     };
 
     class ReachPartyMemberToHealAction : public ReachTargetAction
-	{
+    {
     public:
         ReachPartyMemberToHealAction(PlayerbotAI* ai) : ReachTargetAction(ai, "reach party member to heal", ai->GetRange("heal")) {}
         virtual string GetTargetName() { return "party member to heal"; }

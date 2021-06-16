@@ -30,7 +30,11 @@ namespace ai
             creators["u"] = &ChatTriggerContext::use;
             creators["use"] = &ChatTriggerContext::use;
             creators["c"] = &ChatTriggerContext::item_count;
+            creators["items"] = &ChatTriggerContext::item_count;
+            creators["inventory"] = &ChatTriggerContext::item_count;
+            creators["inv"] = &ChatTriggerContext::item_count;
             creators["e"] = &ChatTriggerContext::equip;
+            creators["equip"] = &ChatTriggerContext::equip;
             creators["ue"] = &ChatTriggerContext::uneqip;
             creators["s"] = &ChatTriggerContext::sell;
             creators["b"] = &ChatTriggerContext::buy;
@@ -81,6 +85,7 @@ namespace ai
             creators["go"] = &ChatTriggerContext::go;
             creators["ready"] = &ChatTriggerContext::ready_check;
             creators["debug"] = &ChatTriggerContext::debug;
+            creators["cdebug"] = &ChatTriggerContext::cdebug;
             creators["cs"] = &ChatTriggerContext::cs;
             creators["wts"] = &ChatTriggerContext::wts;
             creators["hire"] = &ChatTriggerContext::hire;
@@ -99,6 +104,7 @@ namespace ai
         static Trigger* wts(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "wts"); }
         static Trigger* cs(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "cs"); }
         static Trigger* debug(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "debug"); }
+        static Trigger* cdebug(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "cdebug"); }
         static Trigger* go(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "go"); }
         static Trigger* outfit(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "outfit"); }
         static Trigger* mail(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "mail"); }

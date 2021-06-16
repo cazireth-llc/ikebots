@@ -1,7 +1,6 @@
 #include "botpch.h"
 #include "../../playerbot.h"
 #include "TaxiAction.h"
-
 #include "../../../../../game/Server/DBCStructure.h"
 #include "../values/LastMovementValue.h"
 
@@ -15,7 +14,7 @@ bool TaxiAction::Execute(Event event)
 
     WorldPacket& p = event.getPacket();
     string param = event.getParam();
-	if ((!p.empty() && (p.GetOpcode() == CMSG_TAXICLEARALLNODES || p.GetOpcode() == CMSG_TAXICLEARNODE)) || param == "clear")
+    if ((!p.empty() && (p.GetOpcode() == CMSG_TAXICLEARALLNODES || p.GetOpcode() == CMSG_TAXICLEARNODE)) || param == "clear")
     {
         movement.taxiNodes.clear();
         movement.Set(NULL);

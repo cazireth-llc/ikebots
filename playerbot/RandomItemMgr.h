@@ -3,6 +3,12 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
+#ifdef CMANGOS
+#include "Entities/Player.h"
+#endif
+#ifdef MANGOS
+#include "Object/Player.h"
+#endif
 
 using namespace std;
 
@@ -18,6 +24,7 @@ enum RandomItemType
 class RandomItemPredicate
 {
 public:
+    virtual ~RandomItemPredicate(){};
     virtual bool Apply(ItemPrototype const* proto) = 0;
 };
 
@@ -71,6 +78,7 @@ class RandomItemMgr
         uint32 GetAmmo(uint32 level, uint32 subClass);
         uint32 GetRandomPotion(uint32 level, uint32 effect);
         uint32 GetRandomFood(uint32 level, uint32 category);
+        uint32 GetFood(uint32 level, uint32 category);
         uint32 GetRandomTrade(uint32 level);
         bool CanEquipArmor(uint8 clazz, uint32 level, ItemPrototype const* proto);
         bool CanEquipWeapon(uint8 clazz, ItemPrototype const* proto);

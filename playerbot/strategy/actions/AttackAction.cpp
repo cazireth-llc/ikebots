@@ -39,7 +39,12 @@ bool AttackMyTargetAction::Execute(Event event)
 bool AttackAction::Attack(Unit* target)
 {
     MotionMaster &mm = *bot->GetMotionMaster();
-    if (mm.GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE || bot->IsTaxiFlying())
+#ifdef CMANGOS
+	if (mm.GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE || bot->IsFlying())
+#endif
+#ifdef MANGOS
+	if (mm.GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE || bot->IsFlying())
+#endif
     {
         if (verbose) ai->TellError("I cannot attack in flight");
         return false;
@@ -63,7 +68,8 @@ bool AttackAction::Attack(Unit* target)
     {
         msg << " is not on my sight";
         if (verbose) ai->TellError(msg.str());
-        return false;
+        //if (!ChaseTo(target))
+        //    return false;
     }
     if (sServerFacade.UnitIsDead(target))
     {
@@ -72,7 +78,7 @@ bool AttackAction::Attack(Unit* target)
         return false;
     }
 
-    if (bot->IsMounted())
+    if (bot->IsMounted() && bot->IsWithinLOSInMap(target) && (sServerFacade.GetDistance2d(bot, target) < 40.0f))
     {
         WorldPacket emptyPacket;
         bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
@@ -103,7 +109,6 @@ bool AttackAction::Attack(Unit* target)
             creatureAI->SetReactState(REACT_PASSIVE);
 #endif
 #ifdef MANGOS
-            pet->GetCharmInfo()->SetReactState(REACT_PASSIVE);
             pet->GetCharmInfo()->SetCommandState(COMMAND_ATTACK);
 #endif
             creatureAI->AttackStart(target);
@@ -122,9 +127,13 @@ bool AttackAction::Attack(Unit* target)
     if (!sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
         sServerFacade.SetFacingTo(bot, target);
 
-    bot->Attack(target, !ai->IsRanged(bot) || sServerFacade.GetDistance2d(bot, target) <= sPlayerbotAIConfig.tooCloseDistance);
-    ai->ChangeEngine(BOT_STATE_COMBAT);
-    return true;
+    if (bot->Attack(target, !ai->IsRanged(bot) || sServerFacade.GetDistance2d(bot, target) <= sPlayerbotAIConfig.tooCloseDistance))
+    {
+        ai->ChangeEngine(BOT_STATE_COMBAT);
+        return ChaseTo(target);
+    }
+
+    return false;
 }
 
 bool AttackDuelOpponentAction::isUseful()

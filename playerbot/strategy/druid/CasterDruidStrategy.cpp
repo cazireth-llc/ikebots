@@ -146,7 +146,7 @@ void CasterDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
 
 	triggers.push_back(new TriggerNode(
-		"critical health",
+        "critical health",
 		NextAction::array(0, new NextAction("nature's grasp", ACTION_EMERGENCY), NULL)));
 }
 

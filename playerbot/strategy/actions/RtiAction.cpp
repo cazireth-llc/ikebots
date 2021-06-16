@@ -40,7 +40,7 @@ void RtiAction::AppendRti(ostringstream & out, string type)
 
     ostringstream n; n << type << " target";
     Unit* target = AI_VALUE(Unit*, n.str());
-    if(target)
+    if (target)
         out << " (" << target->GetName() << ")";
 
 }
@@ -78,7 +78,11 @@ bool MarkRtiAction::Execute(Event event)
 
     string rti = AI_VALUE(string, "rti");
     int index = RtiTargetValue::GetRtiIndex(rti);
+#ifndef MANGOSBOT_TWO
     group->SetTargetIcon(index, target->GetObjectGuid());
+#else
+    group->SetTargetIcon(index, bot->GetObjectGuid(), target->GetObjectGuid());
+#endif
     return true;
 }
 

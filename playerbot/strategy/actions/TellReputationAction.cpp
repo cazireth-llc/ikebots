@@ -19,7 +19,13 @@ bool TellReputationAction::Execute(Event event)
     if (!unit)
         return false;
 
+#ifdef CMANGOS
     const FactionTemplateEntry *factionTemplate = sServerFacade.GetFactionTemplateEntry(unit);
+#endif
+
+#ifdef MANGOS
+    const FactionTemplateEntry *factionTemplate = unit->getFactionTemplateEntry();
+#endif
     uint32 faction = factionTemplate->faction;
     const FactionEntry* entry = sFactionStore.LookupEntry
 #ifdef CMANGOS

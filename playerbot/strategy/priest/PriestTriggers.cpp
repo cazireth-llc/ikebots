@@ -10,3 +10,4 @@ bool InnerFireTrigger::IsActive()
     Unit* target = GetTarget();
     return SpellTrigger::IsActive() && !ai->HasAura(spell, target);
 }
+

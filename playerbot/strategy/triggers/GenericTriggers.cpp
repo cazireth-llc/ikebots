@@ -48,10 +48,49 @@ bool PanicTrigger::IsActive()
 		(!AI_VALUE2(bool, "has mana", "self target") || AI_VALUE2(uint8, "mana", "self target") < sPlayerbotAIConfig.lowMana);
 }
 
+bool OutNumberedTrigger::IsActive()
+{
+    int32 botLevel = bot->getLevel();
+    uint32 friendPower = 200, foePower = 0;
+    for (auto &attacker : ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("attackers")->Get())
+    {
+     
+        Creature* creature = ai->GetCreature(attacker);
+        if (!creature)
+            continue;
+
+        int32 dLevel = creature->getLevel() - botLevel;
+
+        if(dLevel > -10)
+            foePower = std::max(100 + 10 * dLevel, dLevel * 200);
+    }
+
+    if (!foePower)
+        return false;
+
+    for (auto & helper : ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get())
+    {
+        Unit* player = ai->GetUnit(helper);
+
+        if (!player || player == bot)
+            continue;
+
+        int32 dLevel = player->getLevel() - botLevel;
+
+        if (dLevel > -10 && bot->GetDistance(player) < 10.0f)
+            friendPower += std::max(200 + 20 * dLevel, dLevel * 200);
+    }
+
+    return friendPower < foePower;
+}
+
 bool BuffTrigger::IsActive()
 {
     Unit* target = GetTarget();
-	return SpellTrigger::IsActive() && !ai->HasAura(spell, target, true);
+	return SpellTrigger::IsActive() &&
+        !ai->HasAura(spell, target, true)/* &&
+        (!AI_VALUE2(bool, "has mana", "self target") || AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumMana)*/
+        ;
 }
 
 Value<Unit*>* BuffOnPartyTrigger::GetTargetValue()
@@ -91,7 +130,7 @@ bool AoeTrigger::IsActive()
 
 bool DebuffTrigger::IsActive()
 {
-	return BuffTrigger::IsActive() && AI_VALUE2(uint8, "health", GetTargetName()) > 15;
+    return BuffTrigger::IsActive() && AI_VALUE2(uint8, "health", GetTargetName()) > 15;
 }
 
 bool SpellTrigger::IsActive()
@@ -102,7 +141,7 @@ bool SpellTrigger::IsActive()
 bool SpellCanBeCastTrigger::IsActive()
 {
 	Unit* target = GetTarget();
-	return target && ai->CanCastSpell(spell, target);
+	return target && ai->CanCastSpell(spell, target, true);
 }
 
 bool RandomTrigger::IsActive()
@@ -141,12 +180,17 @@ bool ItemCountTrigger::IsActive()
 
 bool InterruptSpellTrigger::IsActive()
 {
-	return SpellTrigger::IsActive() && ai->IsInterruptableSpellCasting(GetTarget(), getName());
+	return SpellTrigger::IsActive() && ai->IsInterruptableSpellCasting(GetTarget(), getName(), true);
 }
 
 bool HasAuraTrigger::IsActive()
 {
 	return ai->HasAura(getName(), GetTarget());
+}
+
+bool HasNoAuraTrigger::IsActive()
+{
+    return !ai->HasAura(getName(), GetTarget());
 }
 
 bool TankAoeTrigger::IsActive()
@@ -161,8 +205,12 @@ bool TankAoeTrigger::IsActive()
     Unit* tankTarget = AI_VALUE(Unit*, "tank target");
     if (!tankTarget || currentTarget == tankTarget)
         return false;
-
+#ifdef CMANGOS
+    return currentTarget->GetVictim() == AI_VALUE(Unit*, "self target");
+#endif
+#ifdef MANGOS
     return currentTarget->getVictim() == AI_VALUE(Unit*, "self target");
+#endif
 }
 
 bool IsBehindTargetTrigger::IsActive()
@@ -198,15 +246,21 @@ bool NoPossibleTargetsTrigger::IsActive()
     return !targets.size();
 }
 
-bool PossibleAdsTrigger::IsActive()
+bool PossibleAddsTrigger::IsActive()
 {
-    return AI_VALUE(bool, "possible ads") && !AI_VALUE(ObjectGuid, "pull target");
+    return AI_VALUE(bool, "possible adds") && !AI_VALUE(ObjectGuid, "pull target");
 }
 
 bool NotDpsTargetActiveTrigger::IsActive()
 {
     Unit* dps = AI_VALUE(Unit*, "dps target");
     Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
+    
+    // do not switch if enemy target
+    if (target && target == enemy && sServerFacade.IsAlive(target))
+        return false;
+
     return dps && target != dps;
 }
 
@@ -214,14 +268,13 @@ bool NotDpsAoeTargetActiveTrigger::IsActive()
 {
     Unit* dps = AI_VALUE(Unit*, "dps aoe target");
     Unit* target = AI_VALUE(Unit*, "current target");
-    return dps && target != dps;
-}
+    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
 
-bool EnemyPlayerIsAttacking::IsActive()
-{
-    Unit* enemyPlayer = AI_VALUE(Unit*, "enemy player target");
-    Unit* target = AI_VALUE(Unit*, "current target");
-    return enemyPlayer && !target;
+    // do not switch if enemy target
+    if (target && target == enemy && sServerFacade.IsAlive(target))
+        return false;
+
+    return dps && target != dps;
 }
 
 bool IsSwimmingTrigger::IsActive()
@@ -265,4 +318,24 @@ bool StayTimeTrigger::IsActive()
     time_t stayTime = AI_VALUE(time_t, "stay time");
     time_t now = time(0);
     return delay && stayTime && now > stayTime + 2 * delay / 1000;
+}
+
+bool IsMountedTrigger::IsActive()
+{
+    return AI_VALUE2(bool, "mounted", "self target");
+}
+
+bool CorpseNearTrigger::IsActive()
+{
+    return bot->GetCorpse() && bot->GetCorpse()->IsWithinDistInMap(bot, CORPSE_RECLAIM_RADIUS, true);
+}
+
+bool IsFallingTrigger::IsActive()
+{
+    return bot->HasMovementFlag(MOVEFLAG_FALLING);
+}
+
+bool IsFallingFarTrigger::IsActive()
+{
+    return bot->HasMovementFlag(MOVEFLAG_FALLINGFAR);
 }

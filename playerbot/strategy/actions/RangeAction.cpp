@@ -15,7 +15,6 @@ bool RangeAction::Execute(Event event)
         PrintRange("shoot");
         PrintRange("flee");
     }
-
     int pos = param.find(" ");
     if (pos == string::npos) return false;
 
@@ -24,6 +23,12 @@ bool RangeAction::Execute(Event event)
 
     if (value == "?")
     {
+        float curVal = AI_VALUE2(float, "range", qualifier);
+        ostringstream out;
+        out << qualifier << " range: ";
+        if (abs(curVal) >= 0.1f) out << curVal;
+        else out << ai->GetRange(qualifier) << " (default)";
+        ai->TellMaster(out.str());
         PrintRange(qualifier);
         return true;
     }
@@ -47,3 +52,4 @@ void RangeAction::PrintRange(string type)
 
     ai->TellMaster(out.str());
 }
+

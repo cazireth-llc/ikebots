@@ -192,14 +192,14 @@ list<Item*> InventoryAction::parseItems(string text, IterateItemsMask mask)
 
     if (text == "food" || text == "conjured food")
     {
-        FindFoodVisitor visitor(bot, 11, text == "conjured food");
+        FindFoodVisitor visitor(bot, 11, (text == "conjured food"));
         IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
         found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
     }
 
     if (text == "drink" || text == "water" || text == "conjured drink" || text == "conjured water")
     {
-        FindFoodVisitor visitor(bot, 59, text == "conjured drink" || text == "conjured water");
+        FindFoodVisitor visitor(bot, 59, (text == "conjured drink" || text == "conjured water"));
         IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
         found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
     }
@@ -230,6 +230,17 @@ list<Item*> InventoryAction::parseItems(string text, IterateItemsMask mask)
         FindPetVisitor visitor(bot);
         IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
         found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
+    }
+
+    if (text == "ammo")
+    {
+        Item* const pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (pItem)
+        {
+            FindAmmoVisitor visitor(bot, pItem->GetProto()->SubClass);
+            IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
+            found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
+        }
     }
 
     FindNamedItemVisitor visitor(bot, text);

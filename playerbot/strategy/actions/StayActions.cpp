@@ -11,11 +11,19 @@ bool StayActionBase::Stay()
 {
     AI_VALUE(LastMovement&, "last movement").Set(NULL);
 
-    if (!urand(0, 5000)) ai->PlaySound(TEXTEMOTE_YAWN);
+    //if (!urand(0, 10)) ai->PlaySound(TEXTEMOTE_YAWN);
 
     MotionMaster &mm = *bot->GetMotionMaster();
-    if (mm.GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE || bot->IsFlying())
-        return false;
+#ifdef CMANGOS
+	if (mm.GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE || bot->IsFlying())
+#endif
+#ifdef MANGOS
+	if (mm.GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE || bot->IsFlying())
+#endif
+	{
+		if (verbose) ai->TellError("I can not stay, I'm flying!");
+		return false;
+	} 
 
     uint32 sitDelay = sPlayerbotAIConfig.sitDelay / 1000;
     time_t stayTime = AI_VALUE(time_t, "stay time");

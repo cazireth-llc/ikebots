@@ -2,6 +2,7 @@
 #include "../../playerbot.h"
 #include "SellAction.h"
 #include "../ItemVisitors.h"
+#include "../values/ItemUsageValue.h"
 
 using namespace ai;
 
@@ -37,18 +38,39 @@ public:
     }
 };
 
+class SellVendorItemsVisitor : public SellItemsVisitor
+{
+public:
+    SellVendorItemsVisitor(SellAction* action, AiObjectContext* con) : SellItemsVisitor(action) { context = con; }
+
+    AiObjectContext* context;
+
+    virtual bool Visit(Item* item)
+    {
+        ItemUsage usage = context->GetValue<ItemUsage>("item usage", item->GetEntry())->Get();
+
+        if (usage != ITEM_USAGE_VENDOR && usage != ITEM_USAGE_AH)
+            return true;
+
+        return SellItemsVisitor::Visit(item);
+    }
+};
+
 
 bool SellAction::Execute(Event event)
 {
-    Player* master = GetMaster();
-    if (!master)
-        return false;
-
     string text = event.getParam();
 
     if (text == "gray" || text == "*")
     {
         SellGrayItemsVisitor visitor(this);
+        IterateItems(&visitor);
+        return true;
+    }
+
+    if (text == "vendor")
+    {
+        SellVendorItemsVisitor visitor(this, context);
         IterateItems(&visitor);
         return true;
     }
@@ -73,15 +95,16 @@ void SellAction::Sell(FindItemVisitor* visitor)
 
 void SellAction::Sell(Item* item)
 {
-    Player* master = GetMaster();
+    ostringstream out;
     list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest npcs")->Get();
+
     bool bought = false;
     for (list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
     {
         ObjectGuid vendorguid = *i;
         Creature *pCreature = bot->GetNPCIfCanInteractWith(vendorguid,UNIT_NPC_FLAG_VENDOR);
         if (!pCreature)
-            continue;
+            continue;     
 
         ObjectGuid itemguid = item->GetObjectGuid();
         uint32 count = item->GetCount();
@@ -90,7 +113,7 @@ void SellAction::Sell(Item* item)
         p << vendorguid << itemguid << count;
         bot->GetSession()->HandleSellItemOpcode(p);
 
-        ostringstream out; out << "Selling " << chat->formatItem(item->GetProto());
+        out << "Selling " << chat->formatItem(item->GetProto());
         ai->TellMaster(out);
     }
 }

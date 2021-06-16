@@ -16,6 +16,7 @@ namespace ai
         virtual bool AllowExecution(Action* action, Event event) = 0;
         virtual void After(Action* action, bool executed, Event event) = 0;
         virtual bool OverrideResult(Action* action, bool executed, Event event) = 0;
+        virtual ~ActionExecutionListener() {};
     };
 
     // -----------------------------------------------------------------------------------------------------------------------
@@ -76,8 +77,8 @@ namespace ai
 		string GetLastAction() { return lastAction; }
 
     public:
-	    virtual bool DoNextAction(Unit*, int depth = 0);
-	    ActionResult ExecuteAction(string name);
+	    virtual bool DoNextAction(Unit*, int depth = 0, bool minimal = false);
+	    ActionResult ExecuteAction(string name, Event event = Event(), string qualifier = "");
 
     public:
         void AddActionExecutionListener(ActionExecutionListener* listener)

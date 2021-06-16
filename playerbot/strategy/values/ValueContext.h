@@ -56,6 +56,7 @@
 #include "LastSpellCastTimeValue.h"
 #include "ManaSaveLevelValue.h"
 #include "LfgValues.h"
+#include "PvpValues.h"
 #include "EnemyHealerTargetValue.h"
 #include "Formations.h"
 #include "ItemUsageValue.h"
@@ -71,6 +72,8 @@
 #include "SkipSpellsListValue.h"
 #include "SnareTargetValue.h"
 #include "Stances.h"
+#include "MoveTargetValue.h"
+#include "QuestValues.h"
 
 namespace ai
 {
@@ -84,10 +87,15 @@ namespace ai
             creators["collision"] = &ValueContext::collision;
             creators["skip spells list"] = &ValueContext::skip_spells_list_value;
             creators["nearest game objects"] = &ValueContext::nearest_game_objects;
+            creators["nearest game objects no los"] = &ValueContext::nearest_game_objects_no_los;
+            creators["closest game objects"] = &ValueContext::closest_game_objects;
             creators["nearest npcs"] = &ValueContext::nearest_npcs;
             creators["nearest friendly players"] = &ValueContext::nearest_friendly_players;
+            creators["closest friendly players"] = &ValueContext::closest_friendly_players;
+            creators["nearest enemy players"] = &ValueContext::nearest_enemy_players;
             creators["possible targets"] = &ValueContext::possible_targets;
-            creators["possible ads"] = &ValueContext::possible_ads;
+            creators["possible targets no los"] = &ValueContext::possible_targets_no_los;
+            creators["possible adds"] = &ValueContext::possible_adds;
             creators["all targets"] = &ValueContext::all_targets;
             creators["possible rpg targets"] = &ValueContext::possible_rpg_targets;
             creators["nearest adds"] = &ValueContext::nearest_adds;
@@ -170,6 +178,8 @@ namespace ai
             creators["combat"] = &ValueContext::combat;
             creators["lfg proposal"] = &ValueContext::lfg_proposal;
             creators["bag space"] = &ValueContext::bag_space;
+            creators["durability"] = &ValueContext::durability;
+            creators["repair cost"] = &ValueContext::repair_cost;
             creators["enemy healer target"] = &ValueContext::enemy_healer_target;
             creators["snare target"] = &ValueContext::snare_target;
             creators["formation"] = &ValueContext::formation;
@@ -188,6 +198,8 @@ namespace ai
             creators["new player nearby"] = &ValueContext::new_player_nearby;
             creators["already seen players"] = &ValueContext::already_seen_players;
             creators["rpg target"] = &ValueContext::rpg_target;
+            creators["ignore rpg target"] = &ValueContext::ignore_rpg_target;
+            creators["travel target"] = &ValueContext::travel_target;			
             creators["talk target"] = &ValueContext::talk_target;
             creators["pull target"] = &ValueContext::pull_target;
             creators["group"] = &ValueContext::group;
@@ -196,9 +208,30 @@ namespace ai
             creators["party member without item"] = &ValueContext::party_member_without_item;
             creators["party member without food"] = &ValueContext::party_member_without_food;
             creators["party member without water"] = &ValueContext::party_member_without_water;
+            creators["death count"] = &ValueContext::death_count;
+
+            creators["bg type"] = &ValueContext::bg_type;
+            creators["arena type"] = &ValueContext::arena_type;
+            creators["bg role"] = &ValueContext::bg_role;
+            creators["bg master"] = &ValueContext::bg_master;
+            creators["enemy flag carrier"] = &ValueContext::enemy_fc;
+            creators["team flag carrier"] = &ValueContext::team_fc;
+
+            creators["move target"] = &ValueContext::move_target;
+
+            creators["active quest givers"] = &ValueContext::active_quest_givers;
+            creators["active quest takers"] = &ValueContext::active_quest_takers;
+            creators["active quest objectives"] = &ValueContext::active_quest_objectives;
+            creators["free quest log slots"] = &ValueContext::free_quest_log_slots;
         }
 
     private:
+        static UntypedValue* team_fc(PlayerbotAI* ai) { return new FlagCarrierValue(ai, true, true); }
+        static UntypedValue* enemy_fc(PlayerbotAI* ai) { return new FlagCarrierValue(ai, false, true); }
+        static UntypedValue* bg_master(PlayerbotAI* ai) { return new BgMasterValue(ai); }
+        static UntypedValue* bg_role(PlayerbotAI* ai) { return new BgRoleValue(ai); }
+        static UntypedValue* arena_type(PlayerbotAI* ai) { return new ArenaTypeValue(ai); }
+        static UntypedValue* bg_type(PlayerbotAI* ai) { return new BgTypeValue(ai); }
         static UntypedValue* party_member_without_water(PlayerbotAI* ai) { return new PartyMemberWithoutWaterValue(ai); }
         static UntypedValue* party_member_without_food(PlayerbotAI* ai) { return new PartyMemberWithoutFoodValue(ai); }
         static UntypedValue* party_member_without_item(PlayerbotAI* ai) { return new PartyMemberWithoutItemValue(ai); }
@@ -261,15 +294,20 @@ namespace ai
         static UntypedValue* pet_dead(PlayerbotAI* ai) { return new PetIsDeadValue(ai); }
         static UntypedValue* has_mana(PlayerbotAI* ai) { return new HasManaValue(ai); }
         static UntypedValue* nearest_game_objects(PlayerbotAI* ai) { return new NearestGameObjects(ai); }
+        static UntypedValue* nearest_game_objects_no_los(PlayerbotAI* ai) { return new NearestGameObjects(ai, sPlayerbotAIConfig.sightDistance, true); }
+        static UntypedValue* closest_game_objects(PlayerbotAI* ai) { return new NearestGameObjects(ai, INTERACTION_DISTANCE); }
         static UntypedValue* log_level(PlayerbotAI* ai) { return new LogLevelValue(ai); }
         static UntypedValue* nearest_npcs(PlayerbotAI* ai) { return new NearestNpcsValue(ai); }
         static UntypedValue* nearest_friendly_players(PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai); }
+        static UntypedValue* closest_friendly_players(PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai, INTERACTION_DISTANCE); }
+        static UntypedValue* nearest_enemy_players(PlayerbotAI* ai) { return new NearestEnemyPlayersValue(ai); }
         static UntypedValue* nearest_corpses(PlayerbotAI* ai) { return new NearestCorpsesValue(ai); }
         static UntypedValue* possible_rpg_targets(PlayerbotAI* ai) { return new PossibleRpgTargetsValue(ai); }
         static UntypedValue* possible_targets(PlayerbotAI* ai) { return new PossibleTargetsValue(ai); }
-        static UntypedValue* possible_ads(PlayerbotAI* ai) { return new PossibleAdsValue(ai); }
+        static UntypedValue* possible_targets_no_los(PlayerbotAI* ai) { return new PossibleTargetsValue(ai, "possible targets", 50.0f, true); }
+        static UntypedValue* possible_adds(PlayerbotAI* ai) { return new PossibleAddsValue(ai); }
         static UntypedValue* all_targets(PlayerbotAI* ai) { return new AllTargetsValue(ai); }
-        static UntypedValue* nearest_adds(PlayerbotAI* ai) { return new NearestAdsValue(ai); }
+        static UntypedValue* nearest_adds(PlayerbotAI* ai) { return new NearestAddsValue(ai); }
         static UntypedValue* party_member_without_aura(PlayerbotAI* ai) { return new PartyMemberWithoutAuraValue(ai); }
         static UntypedValue* attacker_without_aura(PlayerbotAI* ai) { return new AttackerWithoutAuraTargetValue(ai); }
         static UntypedValue* party_member_to_heal(PlayerbotAI* ai) { return new PartyMemberToHeal(ai); }
@@ -297,6 +335,8 @@ namespace ai
         static UntypedValue* combat(PlayerbotAI* ai) { return new IsInCombatValue(ai); }
         static UntypedValue* lfg_proposal(PlayerbotAI* ai) { return new LfgProposalValue(ai); }
         static UntypedValue* bag_space(PlayerbotAI* ai) { return new BagSpaceValue(ai); }
+        static UntypedValue* durability(PlayerbotAI* ai) { return new DurabilityValue(ai); }
+        static UntypedValue* repair_cost(PlayerbotAI* ai) { return new RepairCostValue(ai); }
         static UntypedValue* enemy_healer_target(PlayerbotAI* ai) { return new EnemyHealerTargetValue(ai); }
         static UntypedValue* snare_target(PlayerbotAI* ai) { return new SnareTargetValue(ai); }
         static UntypedValue* speed(PlayerbotAI* ai) { return new SpeedValue(ai); }
@@ -309,7 +349,17 @@ namespace ai
         static UntypedValue* nearest_non_bot_players(PlayerbotAI* ai) { return new NearestNonBotPlayersValue(ai); }
         static UntypedValue* skip_spells_list_value(PlayerbotAI* ai) { return new SkipSpellsListValue(ai); }
         static UntypedValue* rpg_target(PlayerbotAI* ai) { return new RpgTargetValue(ai); }
+        static UntypedValue* travel_target(PlayerbotAI* ai) { return new TravelTargetValue(ai); }
+        static UntypedValue* ignore_rpg_target(PlayerbotAI* ai) { return new IgnoreRpgTargetValue(ai); }
         static UntypedValue* talk_target(PlayerbotAI* ai) { return new TalkTargetValue(ai); }
         static UntypedValue* pull_target(PlayerbotAI* ai) { return new PullTargetValue(ai); }
-    };
+        static UntypedValue* death_count(PlayerbotAI* ai) { return new DeathCountValue(ai); }
+
+        static UntypedValue* move_target(PlayerbotAI* ai) { return new MoveTargetValue(ai); }
+
+        static UntypedValue* active_quest_givers(PlayerbotAI* ai) { return new ActiveQuestGiversValue(ai); }
+        static UntypedValue* active_quest_takers(PlayerbotAI* ai) { return new ActiveQuestTakersValue(ai); }
+        static UntypedValue* active_quest_objectives(PlayerbotAI* ai) { return new ActiveQuestObjectivesValue(ai); }
+        static UntypedValue* free_quest_log_slots(PlayerbotAI* ai) { return new FreeQuestLogSlotValue(ai); }
+};
 };

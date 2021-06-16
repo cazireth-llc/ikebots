@@ -10,10 +10,7 @@ using namespace ai;
 bool CheckMailAction::Execute(Event event)
 {
     WorldPacket p;
-    bot->GetSession()->HandleQueryNextMailTime(p);
-
-    if (ai->GetMaster() || !bot->GetMailSize())
-        return false;
+    bot->GetSession()->HandleQueryNextMailTime(p);   
 
     list<uint32> ids;
     for (PlayerMails::iterator i = bot->GetMailBegin(); i != bot->GetMailEnd(); ++i)
@@ -48,15 +45,26 @@ bool CheckMailAction::Execute(Event event)
     return true;
 }
 
+bool CheckMailAction::isUseful()
+{
+    if (ai->GetMaster() || !bot->GetMailSize() || bot->InBattleGround())
+        return false;
+
+    return true;
+}
+
 
 void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
 {
     if (mail->items.empty())
     {
+#ifndef MANGOSBOT_TWO
         if (mail->itemTextId)
         {
             sGuildTaskMgr.CheckTaskTransfer(sObjectMgr.GetItemText(mail->itemTextId), owner, bot);
         }
+#endif
+		//TODO Doesn't compile it wotlk
         return;
     }
 

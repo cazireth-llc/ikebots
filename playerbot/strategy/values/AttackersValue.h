@@ -16,15 +16,15 @@ namespace ai
         void AddAttackersOf(Player* player, set<Unit*>& targets);
 		void RemoveNonThreating(set<Unit*>& targets);
 
-	public:
-		static bool IsPossibleTarget(Unit* attacker, Player *bot);
-		static bool IsValidTarget(Unit* attacker, Player *bot);
+    public:
+        static bool IsPossibleTarget(Unit* attacker, Player *bot);
+        static bool IsValidTarget(Unit* attacker, Player *bot);
     };
 
-    class PossibleAdsValue : public BoolCalculatedValue
+    class PossibleAddsValue : public BoolCalculatedValue
     {
     public:
-        PossibleAdsValue(PlayerbotAI* const ai) : BoolCalculatedValue(ai) {}
+        PossibleAddsValue(PlayerbotAI* const ai) : BoolCalculatedValue(ai) {}
         virtual bool Calculate();
     };
 }

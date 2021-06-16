@@ -3,21 +3,21 @@
 
 namespace ai
 {
-    class Position
+    class PositionEntry
     {
     public:
-        Position() : valueSet(false), x(0), y(0), z(0), mapId(0) {}
-        Position(const Position &other) : valueSet(other.valueSet), x(other.x), y(other.y), z(other.z), mapId(other.mapId) {}
-        void Set(double x, double y, double z, uint32 mapId) { this->x = x; this->y = y; this->z = z; this->mapId = mapId; this->valueSet = true; }
+        PositionEntry() : valueSet(false), x(0), y(0), z(0), mapId(0) {}
+        PositionEntry(const PositionEntry &other) : valueSet(other.valueSet), x(other.x), y(other.y), z(other.z), mapId(other.mapId) {}
+        void Set(float x, float y, float z, uint32 mapId) { this->x = x; this->y = y; this->z = z; this->mapId = mapId; this->valueSet = true; }
         void Reset() { valueSet = false; }
         bool isSet() { return valueSet; }
 
-        double x, y, z;
+        float x, y, z;
         bool valueSet;
         uint32 mapId;
     };
 
-    typedef map<string, Position> PositionMap;
+    typedef map<string, PositionEntry> PositionMap;
 
     class PositionValue : public ManualSetValue<PositionMap&>
 	{

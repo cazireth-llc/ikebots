@@ -22,8 +22,8 @@ bool Formation::IsNullLocation(WorldLocation const& loc)
 
 WorldLocation MoveAheadFormation::GetLocation()
 {
-    Player* master = GetMaster();
-    if (!master)
+    Player* master = ai->GetGroupMaster();
+    if (!master || master == bot)
         return WorldLocation();
 
     WorldLocation loc = GetLocationInternal();
@@ -38,14 +38,22 @@ WorldLocation MoveAheadFormation::GetLocation()
         float ori = master->GetOrientation();
         float x1 = x + sPlayerbotAIConfig.tooCloseDistance * cos(ori);
         float y1 = y + sPlayerbotAIConfig.tooCloseDistance * sin(ori);
+#ifdef MANGOSBOT_TWO
+        float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x1, y1, z);
+#else
         float ground = master->GetMap()->GetHeight(x1, y1, z);
+#endif
         if (ground > INVALID_HEIGHT)
         {
             x = x1;
             y = y1;
         }
     }
+#ifdef MANGOSBOT_TWO
+    float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x, y, z);
+#else
     float ground = master->GetMap()->GetHeight(x, y, z);
+#endif
     if (ground <= INVALID_HEIGHT)
         return Formation::NullLocation;
 
@@ -76,7 +84,7 @@ namespace ai
         NearFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "near") {}
         virtual WorldLocation GetLocationInternal()
         {
-            Player* master = GetMaster();
+            Player* master = ai->GetGroupMaster();
             if (!master)
                 return WorldLocation();
 
@@ -85,7 +93,11 @@ namespace ai
             float x = master->GetPositionX() + cos(angle) * range;
             float y = master->GetPositionY() + sin(angle) * range;
             float z = master->GetPositionZ();
+#ifdef MANGOSBOT_TWO
+            float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x, y, z);
+#else
             float ground = master->GetMap()->GetHeight(x, y, z);
+#endif
             if (ground <= INVALID_HEIGHT)
                 return Formation::NullLocation;
 
@@ -104,7 +116,7 @@ namespace ai
         ChaosFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "chaos"), lastChangeTime(0) {}
         virtual WorldLocation GetLocationInternal()
         {
-            Player* master = GetMaster();
+            Player* master = ai->GetGroupMaster();
             if (!master)
                 return WorldLocation();
 
@@ -122,7 +134,11 @@ namespace ai
             float x = master->GetPositionX() + cos(angle) * range + dx;
             float y = master->GetPositionY() + sin(angle) * range + dy;
             float z = master->GetPositionZ();
+#ifdef MANGOSBOT_TWO
+            float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x, y, z);
+#else
             float ground = master->GetMap()->GetHeight(x, y, z);
+#endif
             if (ground <= INVALID_HEIGHT)
                 return Formation::NullLocation;
 
@@ -147,8 +163,8 @@ namespace ai
             float range = 2.0f;
 
             Unit* target = AI_VALUE(Unit*, "current target");
-            Player* master = GetMaster();
-            if (!target)
+            Player* master = ai->GetGroupMaster();
+            if (!target && target != bot)
                 target = master;
 
             if (!target)
@@ -176,7 +192,11 @@ namespace ai
             float x = target->GetPositionX() + cos(angle) * range;
             float y = target->GetPositionY() + sin(angle) * range;
             float z = target->GetPositionZ();
+#ifdef MANGOSBOT_TWO
+            float ground = target->GetMap()->GetHeight(target->GetPhaseMask(), x, y, z);
+#else
             float ground = target->GetMap()->GetHeight(x, y, z);
+#endif
             if (ground <= INVALID_HEIGHT)
                 return Formation::NullLocation;
 
@@ -198,7 +218,7 @@ namespace ai
 
             float range = 2.0f;
 
-            Player* master = GetMaster();
+            Player* master = ai->GetGroupMaster();
             if (!master)
                 return Formation::NullLocation;
 
@@ -236,7 +256,7 @@ namespace ai
 
             float range = sPlayerbotAIConfig.followDistance;
 
-            Player* master = GetMaster();
+            Player* master = ai->GetGroupMaster();
             if (!master)
                 return Formation::NullLocation;
 
@@ -298,8 +318,8 @@ namespace ai
             float range = sPlayerbotAIConfig.farDistance;
             float followRange = sPlayerbotAIConfig.followDistance;
 
-            Player* master = GetMaster();
-            if (!master)
+            Player* master = ai->GetGroupMaster();
+            if (!master || master == bot)
                 return Formation::NullLocation;
 
             if (sServerFacade.GetDistance2d(bot, master) <= range)
@@ -311,7 +331,11 @@ namespace ai
             float x = master->GetPositionX() + cos(angle) * range + cos(followAngle) * followRange;
             float y = master->GetPositionY() + sin(angle) * range + sin(followAngle) * followRange;
             float z = master->GetPositionZ();
+#ifdef MANGOSBOT_TWO
+            float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x, y, z);
+#else
             float ground = master->GetMap()->GetHeight(x, y, z);
+#endif
             if (ground <= INVALID_HEIGHT)
             {
                 float minDist = 0, minX = 0, minY = 0;
@@ -320,7 +344,11 @@ namespace ai
                     x = master->GetPositionX() + cos(angle) * range + cos(followAngle) * followRange;
                     y = master->GetPositionY() + sin(angle) * range + sin(followAngle) * followRange;
                     float dist = sServerFacade.GetDistance2d(bot, x, y);
+#ifdef MANGOSBOT_TWO
+                    float ground = master->GetMap()->GetHeight(master->GetPhaseMask(), x, y, z);
+#else
                     float ground = master->GetMap()->GetHeight(x, y, z);
+#endif
                     if (ground > INVALID_HEIGHT && (!minDist || minDist > dist))
                     {
                         minDist = dist;
@@ -347,11 +375,11 @@ namespace ai
 
 float Formation::GetFollowAngle()
 {
-    Player* master = GetMaster();
+    Player* master = ai->GetGroupMaster();
     Group* group = bot->GetGroup();
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     int index = 1, total = 1;
-    if (!group && master)
+    if (!group && master && !master->GetPlayerbotAI())
     {
         for (PlayerBotMap::const_iterator i = master->GetPlayerbotMgr()->GetPlayerBotsBegin(); i != master->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++i)
         {
@@ -394,10 +422,8 @@ float Formation::GetFollowAngle()
             if (*i == bot) break;
             index++;
         }
-
         total = roster.size() + 1;
     }
-
     float start = (master ? master->GetOrientation() : 0.0f);
     return start + (0.125f + 1.75f * index / total + (total == 2 ? 0.125f : 0.0f)) * M_PI;
 }
@@ -413,6 +439,7 @@ string FormationValue::Save()
 
 bool FormationValue::Load(string formation)
 {
+
     if (formation == "melee")
     {
         if (value) delete value;
@@ -547,7 +574,11 @@ WorldLocation MoveFormation::MoveSingleLine(vector<Player*> line, float diff, fl
             float lx = x + cos(angle) * radius;
             float ly = y + sin(angle) * radius;
             float lz = cz;
+#ifdef MANGOSBOT_TWO
+            float ground = bot->GetMap()->GetHeight(bot->GetPhaseMask(), lx, ly, lz);
+#else
             float ground = bot->GetMap()->GetHeight(lx, ly, lz);
+#endif
             if (ground <= INVALID_HEIGHT)
                 return Formation::NullLocation;
 

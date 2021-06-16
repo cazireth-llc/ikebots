@@ -15,8 +15,8 @@ namespace ai
     };
 
     class DpsAoeTargetValue : public RtiTargetValue
-	{
-	public:
+    {
+    public:
         DpsAoeTargetValue(PlayerbotAI* ai) : RtiTargetValue(ai) {}
 
     public:

@@ -29,7 +29,6 @@ bool CollisionValue::Calculate()
 
         float dist = sServerFacade.GetDistance2d(bot, target->GetPositionX(), target->GetPositionY());
         if (sServerFacade.IsDistanceLessThan(dist, target->GetObjectBoundingRadius())) return true;
-
     }
 
     return false;

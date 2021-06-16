@@ -60,6 +60,7 @@ public:
 
         return true;
     }
+
     static TellMailProcessor instance;
 
 private:
@@ -106,7 +107,7 @@ public:
                 WorldPacket packet;
                 packet << mailbox;
                 packet << mail->messageID;
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_ZERO
                 packet << *i;
 #endif
                 Item* item = bot->GetMItem(*i);
@@ -172,11 +173,15 @@ public:
         ostringstream out, body;
         out << "|cffffffff" << mail->subject;
         ai->TellMaster(out.str());
+#ifdef MANGOSBOT_TWO
+
+#else
         if (mail->itemTextId)
         {
             body << "\n" << sObjectMgr.GetItemText(mail->itemTextId);
             ai->TellMaster(body.str());
         }
+#endif
         return true;
     }
     static ReadMailProcessor instance;
@@ -254,7 +259,7 @@ void MailProcessor::RemoveMail(Player* bot, uint32 id, ObjectGuid mailbox)
     WorldPacket packet;
     packet << mailbox;
     packet << id;
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_ZERO
     packet << (uint32)0; //mailTemplateId
 #endif
     bot->GetSession()->HandleMailDelete(packet);

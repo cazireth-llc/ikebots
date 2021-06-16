@@ -370,6 +370,9 @@ namespace ai
         virtual string getName() { return "panic"; }
     END_TRIGGER()
 
+    BEGIN_TRIGGER(OutNumberedTrigger, Trigger)
+        virtual string getName() { return "outnumbered"; }
+    END_TRIGGER()
 
 	class NoPetTrigger : public Trigger
 	{
@@ -383,7 +386,7 @@ namespace ai
 
 	class ItemCountTrigger : public Trigger {
 	public:
-		ItemCountTrigger(PlayerbotAI* ai, string item, int count) : Trigger(ai, item, 30) {
+		ItemCountTrigger(PlayerbotAI* ai, string item, int count, int interval = 30) : Trigger(ai, item, interval) {
 			this->item = item;
 			this->count = count;
 		}
@@ -396,6 +399,12 @@ namespace ai
 		int count;
 	};
 
+    class AmmoCountTrigger : public ItemCountTrigger
+    {
+    public:
+        AmmoCountTrigger(PlayerbotAI* ai, string item, uint32 count = 1, int interval = 30) : ItemCountTrigger(ai, item, count, interval) {}
+    };
+
 	class HasAuraTrigger : public Trigger {
 	public:
 		HasAuraTrigger(PlayerbotAI* ai, string spell) : Trigger(ai, spell) {}
@@ -404,6 +413,15 @@ namespace ai
 		virtual bool IsActive();
 
 	};
+
+    class HasNoAuraTrigger : public Trigger {
+    public:
+        HasNoAuraTrigger(PlayerbotAI* ai, string spell) : Trigger(ai, spell) {}
+
+        virtual string GetTargetName() { return "self target"; }
+        virtual bool IsActive();
+
+    };
 
     class TimerTrigger : public Trigger
     {
@@ -511,19 +529,10 @@ namespace ai
         virtual bool IsActive();
     };
 
-    class PossibleAdsTrigger : public Trigger
+    class PossibleAddsTrigger : public Trigger
     {
     public:
-        PossibleAdsTrigger(PlayerbotAI* ai) : Trigger(ai, "possible ads") {}
-
-    public:
-        virtual bool IsActive();
-    };
-
-    class EnemyPlayerIsAttacking : public Trigger
-    {
-    public:
-        EnemyPlayerIsAttacking(PlayerbotAI* ai) : Trigger(ai, "enemy player is attacking") {}
+        PossibleAddsTrigger(PlayerbotAI* ai) : Trigger(ai, "possible adds") {}
 
     public:
         virtual bool IsActive();
@@ -589,19 +598,23 @@ namespace ai
     class NoNonBotPlayersAroundTrigger : public Trigger
     {
     public:
-        NoNonBotPlayersAroundTrigger(PlayerbotAI* ai) : Trigger(ai, "no non bot players around", 5) {}
+        NoNonBotPlayersAroundTrigger(PlayerbotAI* ai) : Trigger(ai, "no non bot players around", 10) {}
 
     public:
         virtual bool IsActive()
         {
-            return AI_VALUE(list<ObjectGuid>, "nearest non bot players").empty();
+            return !ai->HasPlayerNearby();
+            /*if (!bot->InBattleGround())
+                return AI_VALUE(list<ObjectGuid>, "nearest non bot players").empty();
+            else
+                return false;*/
         }
     };
 
     class NewPlayerNearbyTrigger : public Trigger
     {
     public:
-        NewPlayerNearbyTrigger(PlayerbotAI* ai) : Trigger(ai, "new player nearby", 2) {}
+        NewPlayerNearbyTrigger(PlayerbotAI* ai) : Trigger(ai, "new player nearby", 10) {}
 
     public:
         virtual bool IsActive()
@@ -613,7 +626,7 @@ namespace ai
     class CollisionTrigger : public Trigger
     {
     public:
-        CollisionTrigger(PlayerbotAI* ai) : Trigger(ai, "collision") {}
+        CollisionTrigger(PlayerbotAI* ai) : Trigger(ai, "collision", 5) {}
 
     public:
         virtual bool IsActive()
@@ -682,6 +695,42 @@ namespace ai
         {
             return AI_VALUE(Unit*, "party member without water") && AI_VALUE2(uint8, "item count", item);
         }
+    };
+
+    class IsMountedTrigger : public Trigger
+    {
+    public:
+        IsMountedTrigger(PlayerbotAI* ai) : Trigger(ai, "mounted", 1) {}
+
+    public:
+        virtual bool IsActive();
+    };
+
+    class CorpseNearTrigger : public Trigger
+    {
+    public:
+        CorpseNearTrigger(PlayerbotAI* ai) : Trigger(ai, "corpse near", 10) {}
+
+    public:
+        virtual bool IsActive();
+    };
+
+    class IsFallingTrigger : public Trigger
+    {
+    public:
+        IsFallingTrigger(PlayerbotAI* ai) : Trigger(ai, "falling", 10) {}
+
+    public:
+        virtual bool IsActive();
+    };
+
+    class IsFallingFarTrigger : public Trigger
+    {
+    public:
+        IsFallingFarTrigger(PlayerbotAI* ai) : Trigger(ai, "falling far", 10) {}
+
+    public:
+        virtual bool IsActive();
     };
 }
 

@@ -13,13 +13,16 @@ namespace ai
         }
 
     protected:
+        bool ChaseTo(WorldObject *obj);
         bool MoveNear(uint32 mapId, float x, float y, float z, float distance = sPlayerbotAIConfig.contactDistance);
-        bool MoveTo(uint32 mapId, float x, float y, float z, bool idle = false);
+        bool MoveTo(uint32 mapId, float x, float y, float z, bool idle = false, bool react = false);
         bool MoveTo(Unit* target, float distance = 0.0f);
         bool MoveNear(WorldObject* target, float distance = sPlayerbotAIConfig.contactDistance);
+        bool MoveToLOS(WorldObject* target, bool ranged = false);
         float GetFollowAngle();
         bool Follow(Unit* target, float distance = sPlayerbotAIConfig.followDistance);
         bool Follow(Unit* target, float distance, float angle);
+        float MoveDelay(float distance);
         void WaitForReach(float distance);
         bool IsMovingAllowed(Unit* target);
         bool IsMovingAllowed(uint32 mapId, float x, float y, float z);
@@ -27,6 +30,9 @@ namespace ai
         bool Flee(Unit *target);
         void ClearIdleState();
         void UpdateMovementState();
+        
+        void CreateWp(Player* wpOwner, float x, float y, float z, float o, uint32 entry, bool important = false);
+        float GetAngle(const float x1, const float y1, const float x2, const float y2);
     };
 
     class FleeAction : public MovementAction
@@ -87,12 +93,21 @@ namespace ai
         SetBehindTargetAction(PlayerbotAI* ai) : MovementAction(ai, "set behind") {}
         virtual bool Execute(Event event);
         virtual bool isUseful();
+        virtual bool isPossible();
     };
 
     class MoveOutOfCollisionAction : public MovementAction
     {
     public:
         MoveOutOfCollisionAction(PlayerbotAI* ai) : MovementAction(ai, "move out of collision") {}
+        virtual bool Execute(Event event);
+        virtual bool isUseful();
+    };
+
+    class MoveRandomAction : public MovementAction
+    {
+    public:
+        MoveRandomAction(PlayerbotAI* ai) : MovementAction(ai, "move random") {}
         virtual bool Execute(Event event);
         virtual bool isUseful();
     };

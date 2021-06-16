@@ -94,6 +94,11 @@ namespace ai
 		CastThornsAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "thorns") {}
 	};
 
+    class CastThornsOnPartyAction : public BuffOnPartyAction {
+    public:
+        CastThornsOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "thorns") {}
+    };
+
 	class CastOmenOfClarityAction : public CastBuffSpellAction {
 	public:
 	    CastOmenOfClarityAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "omen of clarity") {}
@@ -149,10 +154,10 @@ namespace ai
         virtual bool Execute(Event event);
     };
 
-	class CastHibernateAction : public CastSpellAction
+    class CastHibernateAction : public CastSpellAction
 	{
 	public:
-		CastHibernateAction(PlayerbotAI* ai) : CastSpellAction(ai, "hibernate") {}
+        CastHibernateAction(PlayerbotAI* ai) : CastSpellAction(ai, "hibernate") {}
 	};
 
     class CastHibernateCcAction : public CastSpellAction
@@ -163,10 +168,10 @@ namespace ai
         virtual bool Execute(Event event);
     };
 
-	class CastNaturesGraspAction : public CastBuffSpellAction
+    class CastNaturesGraspAction : public CastBuffSpellAction
 	{
 	public:
-		CastNaturesGraspAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "nature's grasp") {}
+        CastNaturesGraspAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "nature's grasp") {}
 	};
 
 	class CastCurePoisonAction : public CastCureSpellAction
