@@ -65,7 +65,7 @@ void DpsPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "seal",
         NextAction::array(0, new NextAction("seal of wisdom", 90.0f), NULL)));
 
-   triggers.push_back(new TriggerNode(
+    triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("divine shield", ACTION_CRITICAL_HEAL + 2), new NextAction("holy light", ACTION_CRITICAL_HEAL + 2), NULL)));
 

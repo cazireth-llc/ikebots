@@ -16,9 +16,10 @@ PerformanceMonitor::~PerformanceMonitor()
 
 PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, string name)
 {
-    if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;
+	if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;
 
-    std::lock_guard<std::mutex> guard(lock);
+#ifdef CMANGOS
+	std::lock_guard<std::mutex> guard(lock);
     PerformanceData *pd = data[metric][name];
     if (!pd)
     {
@@ -27,7 +28,8 @@ PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric,
         data[metric][name] = pd;
     }
 
-    return new PerformanceMonitorOperation(pd);
+	return new PerformanceMonitorOperation(pd);
+#endif
 }
 
 void PerformanceMonitor::PrintStats()
@@ -68,20 +70,25 @@ void PerformanceMonitor::Reset()
         map<string, PerformanceData*> pdMap = i->second;
         for (map<string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
         {
+#ifdef CMANGOS
             PerformanceData* pd = j->second;
             std::lock_guard<std::mutex> guard(pd->lock);
             pd->minTime = pd->maxTime = pd->totalTime = pd->count = 0;
+#endif
         }
     }
 }
 
 PerformanceMonitorOperation::PerformanceMonitorOperation(PerformanceData* data) : data(data)
 {
+#ifdef CMANGOS
     started = (std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now())).time_since_epoch();
+#endif
 }
 
 void PerformanceMonitorOperation::finish()
 {
+#ifdef CMANGOS
     std::chrono::milliseconds finished = (std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now())).time_since_epoch();
     uint32 elapsed = (finished - started).count();
 
@@ -93,9 +100,11 @@ void PerformanceMonitorOperation::finish()
         data->totalTime += elapsed;
     }
     data->count++;
+#endif
     delete this;
 }
 
+#ifdef CMANGOS
 bool ChatHandler::HandlePerfMonCommand(char* args)
 {
     if (!strcmp(args, "reset"))
@@ -107,3 +116,4 @@ bool ChatHandler::HandlePerfMonCommand(char* args)
     sPerformanceMonitor.PrintStats();
     return true;
 }
+#endif

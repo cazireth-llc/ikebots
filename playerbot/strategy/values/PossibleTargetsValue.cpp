@@ -1,6 +1,7 @@
 #include "botpch.h"
 #include "../../playerbot.h"
 #include "PossibleTargetsValue.h"
+#include "AttackersValue.h"
 
 #include "../../ServerFacade.h"
 #include "AttackersValue.h"

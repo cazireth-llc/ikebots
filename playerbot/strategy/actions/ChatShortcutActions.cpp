@@ -3,13 +3,14 @@
 #include "ChatShortcutActions.h"
 #include "../../PlayerbotAIConfig.h"
 #include "../values/PositionValue.h"
+#include "../values/Formations.h"
 
 using namespace ai;
 
 void ReturnPositionResetAction::ResetReturnPosition()
 {
     ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
-    ai::Position pos = posMap["return"];
+    ai::PositionEntry pos = posMap["return"];
     pos.Reset();
     posMap["return"] = pos;
 }
@@ -17,7 +18,7 @@ void ReturnPositionResetAction::ResetReturnPosition()
 void ReturnPositionResetAction::SetReturnPosition(float x, float y, float z)
 {
     ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
-    ai::Position pos = posMap["return"];
+    ai::PositionEntry pos = posMap["return"];
     pos.Set(x, y, z, ai->GetBot()->GetMapId());
     posMap["return"] = pos;
 }
@@ -31,10 +32,46 @@ bool FollowChatShortcutAction::Execute(Event event)
     ai->Reset();
     ai->ChangeStrategy("+follow,-passive", BOT_STATE_NON_COMBAT);
     ai->ChangeStrategy("-follow,-passive", BOT_STATE_COMBAT);
-    ResetReturnPosition();
-    if (bot->GetMapId() != master->GetMapId() || bot->GetDistance(master) > sPlayerbotAIConfig.sightDistance)
+
+    ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
+    ai::PositionEntry pos = posMap["return"];
+    pos.Reset();
+    posMap["return"] = pos;
+
+    if (sServerFacade.IsInCombat(bot))
     {
-        ai->TellError("I will not follow you - too far away");
+        Formation* formation = AI_VALUE(Formation*, "formation");
+        string target = formation->GetTargetName();
+        bool moved = false;
+        if (!target.empty())
+        {
+            moved = Follow(AI_VALUE(Unit*, target));
+        }
+        else
+        {
+            WorldLocation loc = formation->GetLocation();
+            if (Formation::IsNullLocation(loc) || loc.mapid == -1)
+                return false;
+
+            moved = MoveTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+        }
+        if (moved)
+        {
+            ai->TellMaster("Following");
+            return true;
+        }
+    }
+    if (bot->GetMapId() != master->GetMapId() || (master && bot->GetDistance(master) > sPlayerbotAIConfig.sightDistance))
+    {
+        if (sServerFacade.UnitIsDead(bot))
+        {
+            bot->ResurrectPlayer(1.0f, false);
+            ai->TellMasterNoFacing("Back from the grave!");
+        }
+        else
+            ai->TellError("I will not follow you - too far away");
+
+        bot->TeleportTo(master->GetMapId(), master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
         return true;
     }
     ai->TellMaster("Following");
@@ -126,8 +163,11 @@ bool MaxDpsChatShortcutAction::Execute(Event event)
     if (!master)
         return false;
 
+    if (!ai->ContainsStrategy(STRATEGY_TYPE_DPS))
+        return false;
+
     ai->Reset();
-    ai->ChangeStrategy("-threat,-conserve mana,-cast time,+dps debuff", BOT_STATE_COMBAT);
-    ai->TellMaster("Max DPS");
+    ai->ChangeStrategy("-threat,-conserve mana,-cast time,+dps debuff,+boost", BOT_STATE_COMBAT);
+    ai->TellMaster("Max DPS!");
     return true;
 }

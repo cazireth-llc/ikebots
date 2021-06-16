@@ -32,7 +32,7 @@ float CastTimeMultiplier::GetValue(Action* action)
 #ifdef CMANGOS
                 , bot
 #endif
-                );
+        );
         if (spellId && castTime >= 3000)
             return 0.0f;
 

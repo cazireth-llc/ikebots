@@ -110,11 +110,19 @@ file(GLOB Playerbot_Warrior ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/warri
     source_group("Player Bot\\Strategies\\Warrior" FILES ${Playerbot_Warrior})
     LIST(APPEND LIBRARY_SRCS ${Playerbot_Warrior})
 
+#Deathknight AI
+file(GLOB Playerbot_DeathKnight ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/deathknight/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/deathknight/*.h)
+    source_group("Player Bot\\Strategies\\DeathKnight" FILES ${Playerbot_DeathKnight})
+    LIST(APPEND LIBRARY_SRCS ${Playerbot_DeathKnight})
+
 # Define ENABLE_PLAYERBOTS if need
 if (BUILD_PLAYERBOT)
   add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 if (PLAYERBOTS)
+  add_definitions(-DENABLE_PLAYERBOTS)
+endif()
+if (BUILD_IKE3_BOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
@@ -204,10 +212,7 @@ endif()
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 
-target_link_libraries(${LIBRARY_NAME} 
-	shared 
-	RecastNavigation::Detour
-)
+target_link_libraries(${LIBRARY_NAME} shared detour)
 
 if(UNIX)
   # Both systems don't have libdl and don't need them
@@ -222,6 +227,11 @@ if (NOT CONF_INSTALL_DIR)
   set(CONF_INSTALL_DIR ${CONF_DIR})
 endif()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist DESTINATION ${CONF_INSTALL_DIR})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ahbot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist)
+if (NOT CONF_INSTALL_DIR)
+  set(CONF_INSTALL_DIR ${CONF_DIR})
+endif()
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist DESTINATION ${CONF_INSTALL_DIR})
 
 # Generate PCH
 if(PCH)

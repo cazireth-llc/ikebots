@@ -76,5 +76,4 @@ void DpsWarlockDebuffStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "siphon life",
         NextAction::array(0, new NextAction("siphon life", 23.0f), NULL)));
-
 }

@@ -9,6 +9,7 @@ using namespace std;
 map<string, uint32> ChatHelper::consumableSubClasses;
 map<string, uint32> ChatHelper::tradeSubClasses;
 map<string, uint32> ChatHelper::itemQualities;
+map<string, uint32> ChatHelper::projectileSubClasses;
 map<string, uint32> ChatHelper::slots;
 map<string, uint32> ChatHelper::skills;
 map<string, ChatMsg> ChatHelper::chats;
@@ -41,6 +42,8 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     itemQualities["blue"] = ITEM_QUALITY_RARE;
     itemQualities["epic"] = ITEM_QUALITY_EPIC;
     itemQualities["violet"] = ITEM_QUALITY_EPIC;
+    itemQualities["legendary"] = ITEM_QUALITY_LEGENDARY;
+    itemQualities["yellow"] = ITEM_QUALITY_LEGENDARY;
 
     consumableSubClasses["potion"] = ITEM_SUBCLASS_POTION;
     consumableSubClasses["elixir"] = ITEM_SUBCLASS_ELIXIR;
@@ -49,6 +52,9 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     consumableSubClasses["food"] = ITEM_SUBCLASS_FOOD;
     consumableSubClasses["bandage"] = ITEM_SUBCLASS_BANDAGE;
     consumableSubClasses["enchant"] = ITEM_SUBCLASS_CONSUMABLE_OTHER;
+
+    projectileSubClasses["arrows"] = ITEM_SUBCLASS_ARROW;
+    projectileSubClasses["bullets"] = ITEM_SUBCLASS_BULLET;
 
     //tradeSubClasses["cloth"] = ITEM_SUBCLASS_CLOTH;
     //tradeSubClasses["leather"] = ITEM_SUBCLASS_LEATHER;
@@ -151,6 +157,13 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     specs[CLASS_WARRIOR][1] = "fury";
     specs[CLASS_WARRIOR][2] = "protection";
 
+#ifdef MANGOSBOT_TWO
+    classes[CLASS_DEATH_KNIGHT] = "dk";
+    specs[CLASS_DEATH_KNIGHT][0] = "blood";
+    specs[CLASS_DEATH_KNIGHT][1] = "frost";
+    specs[CLASS_DEATH_KNIGHT][2] = "unholy";
+#endif
+
     races[RACE_DWARF] = "Dwarf";
     races[RACE_GNOME] = "Gnome";
     races[RACE_HUMAN] = "Human";
@@ -159,6 +172,10 @@ ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     races[RACE_TAUREN] = "Tauren";
     races[RACE_TROLL] = "Troll";
     races[RACE_UNDEAD] = "Undead";
+#ifndef MANGOSBOT_ZERO
+    races[RACE_BLOODELF] = "Blood Elf";
+    races[RACE_DRAENEI] = "Draenei";
+#endif
 }
 
 string ChatHelper::formatMoney(uint32 copper)
@@ -268,6 +285,37 @@ string ChatHelper::formatGameobject(GameObject* go)
 {
     ostringstream out;
     out << "|cFFFFFF00|Hfound:" << go->GetObjectGuid().GetRawValue() << ":" << go->GetEntry() << ":" <<  "|h[" << go->GetGOInfo()->name << "]|h|r";
+    return out.str();
+}
+
+string ChatHelper::formatWorldobject(WorldObject* wo)
+{
+    ostringstream out;
+    out << "|cFFFFFF00|Hfound:" << wo->GetObjectGuid().GetRawValue() << ":" << wo->GetEntry() << ":" << "|h[" << wo->GetName() << "]|h|r";
+    return out.str();
+}
+
+string ChatHelper::formatWorldEntry(int32 entry)
+{
+    CreatureInfo const* cInfo = NULL;
+    GameObjectInfo const* gInfo = NULL;
+
+    if (entry > 0)
+        cInfo = ObjectMgr::GetCreatureTemplate(entry);
+    else
+        gInfo = ObjectMgr::GetGameObjectInfo(entry * -1);
+
+    ostringstream out;
+    out << "|cFFFFFF00|Hentry:" << abs(entry) << ":" << "|h[";
+    
+    if (entry < 0 && gInfo)
+        out << gInfo->name;
+    else if (entry > 0 && cInfo)
+        out << cInfo->Name;
+    else
+        out << "unknown";
+    
+    out << "]|h|r";
     return out.str();
 }
 
@@ -410,6 +458,13 @@ bool ChatHelper::parseItemClass(string text, uint32 *itemClass, uint32 *itemSubC
         return true;
     }
 
+    if (projectileSubClasses.find(text) != projectileSubClasses.end())
+    {
+        *itemClass = ITEM_CLASS_PROJECTILE;
+        *itemSubClass = projectileSubClasses[text];
+        return true;
+    }
+
     return false;
 }
 
@@ -425,6 +480,7 @@ bool ChatHelper::parseable(string text)
 {
     return text.find("|H") != string::npos ||
             text == "questitem" ||
+            text == "ammo" ||
             substrContainsInMap<uint32>(text, consumableSubClasses) ||
             substrContainsInMap<uint32>(text, tradeSubClasses) ||
             substrContainsInMap<uint32>(text, itemQualities) ||
@@ -486,4 +542,15 @@ string ChatHelper::formatSkill(uint32 skill)
 string ChatHelper::formatBoolean(bool flag)
 {
     return flag ? "|cff00ff00ON|r" : "|cffffff00OFF|r";
+}
+
+void ChatHelper::eraseAllSubStr(std::string& mainStr, const std::string& toErase)
+{
+    size_t pos = std::string::npos;
+    // Search for the substring in string in a loop untill nothing is found
+    while ((pos = mainStr.find(toErase)) != std::string::npos)
+    {
+        // If found then erase it from string
+        mainStr.erase(pos, toErase.length());
+    }
 }

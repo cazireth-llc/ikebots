@@ -24,7 +24,6 @@ Unit* TargetValue::FindTarget(FindTargetStrategy* strategy)
     return strategy->GetResult();
 }
 
-
 bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
 {
     Group* group = ai->GetBot()->GetGroup();
@@ -34,7 +33,7 @@ bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *member = sObjectMgr.GetPlayer(itr->guid);
-            if( !member || !sServerFacade.IsAlive(member))
+            if (!member || !sServerFacade.IsAlive(member))
                 continue;
 
             PlayerbotAI *ai = member->GetPlayerbotAI();

@@ -156,6 +156,7 @@ public:
             return message;
 
         bool found = false;
+        bool isRti = false;
         for (list<string>::iterator i = rtis.begin(); i != rtis.end(); i++)
         {
             string rti = *i;
@@ -175,7 +176,8 @@ public:
             if (target->GetObjectGuid() != rtiTarget)
                 return "";
 
-            if (found |= isRti)
+            found |= isRti;
+            if (found)
                 break;
         }
 
@@ -194,7 +196,9 @@ class ClassChatFilter : public ChatFilter
 public:
     ClassChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     {
-        //classNames["@death_knight"] = CLASS_DEATH_KNIGHT;
+#ifdef MANGOSBOT_TWO
+        classNames["@death_knight"] = CLASS_DEATH_KNIGHT;
+#endif
         classNames["@druid"] = CLASS_DRUID;
         classNames["@hunter"] = CLASS_HUNTER;
         classNames["@mage"] = CLASS_MAGE;
@@ -211,13 +215,15 @@ public:
         Player* bot = ai->GetBot();
 
         bool found = false;
+        bool isClass = false;
         for (map<string, uint8>::iterator i = classNames.begin(); i != classNames.end(); i++)
         {
             bool isClass = message.find(i->first) == 0;
             if (isClass && bot->getClass() != i->second)
                 return "";
 
-            if (found |= isClass)
+            found |= isClass;
+            if (found)
                 break;
         }
 

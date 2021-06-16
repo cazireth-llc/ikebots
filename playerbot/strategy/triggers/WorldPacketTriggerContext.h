@@ -38,17 +38,30 @@ namespace ai
             creators["ready check"] = &WorldPacketTriggerContext::ready_check;
             creators["ready check finished"] = &WorldPacketTriggerContext::ready_check_finished;
             creators["uninvite"] = &WorldPacketTriggerContext::uninvite;
+            creators["uninvite guid"] = &WorldPacketTriggerContext::uninvite_guid;
             creators["lfg join"] = &WorldPacketTriggerContext::lfg_update;
             creators["lfg proposal"] = &WorldPacketTriggerContext::lfg_proposal;
             creators["lfg role check"] = &WorldPacketTriggerContext::lfg_role_check;
             creators["lfg leave"] = &WorldPacketTriggerContext::lfg_leave;
             creators["guild invite"] = &WorldPacketTriggerContext::guild_invite;
+            creators["petition offer"] = &WorldPacketTriggerContext::petition_offer;
             creators["lfg teleport"] = &WorldPacketTriggerContext::lfg_teleport;
             creators["inventory change failure"] = &WorldPacketTriggerContext::inventory_change_failure;
+            creators["bg status"] = &WorldPacketTriggerContext::bg_status;
+            creators["levelup"] = &WorldPacketTriggerContext::levelup;
+            creators["xpgain"] = &WorldPacketTriggerContext::xpgain;
+            creators["see spell"] = &WorldPacketTriggerContext::seespell;
+            creators["release spirit"] = &WorldPacketTriggerContext::release_spirit;
+            creators["revive from corpse"] = &WorldPacketTriggerContext::revive_from_corpse;
+            creators["receive emote"] = &WorldPacketTriggerContext::receive_emote;
+            creators["receive text emote"] = &WorldPacketTriggerContext::receive_text_emote;
+            creators["arena team invite"] = &WorldPacketTriggerContext::arena_team_invite;
         }
 
     private:
+        static Trigger* bg_status(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "bg status"); }
         static Trigger* inventory_change_failure(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "inventory change failure"); }
+        static Trigger* petition_offer(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "petition offer"); }
         static Trigger* guild_invite(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "guild invite"); }
         static Trigger* lfg_teleport(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "lfg teleport"); }
         static Trigger* lfg_leave(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "lfg leave"); }
@@ -56,6 +69,7 @@ namespace ai
         static Trigger* lfg_role_check(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "lfg role check"); }
         static Trigger* lfg_update(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "lfg join"); }
         static Trigger* uninvite(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "uninvite"); }
+        static Trigger* uninvite_guid(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "uninvite guid"); }
         static Trigger* ready_check_finished(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "ready check finished"); }
         static Trigger* ready_check(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "ready check"); }
         static Trigger* duel_requested(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "duel requested"); }
@@ -83,5 +97,13 @@ namespace ai
         static Trigger* quest_share(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest share"); }
         static Trigger* loot_roll(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot roll"); }
         static Trigger* taxi(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "activate taxi"); }
+        static Trigger* levelup(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "levelup"); }
+        static Trigger* xpgain(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "xpgain"); }
+        static Trigger* seespell(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "see spell"); }
+        static Trigger* release_spirit(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "release spirit"); }
+        static Trigger* revive_from_corpse(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "revive from corpse"); }
+        static Trigger* receive_emote(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "receive emote"); }
+        static Trigger* receive_text_emote(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "receive text emote"); }
+        static Trigger* arena_team_invite(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "arena team invite"); }
     };
 };

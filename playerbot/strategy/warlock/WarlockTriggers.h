@@ -96,4 +96,5 @@ namespace ai
     public:
         AmplifyCurseTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "amplify curse") {}
     };
+
 }

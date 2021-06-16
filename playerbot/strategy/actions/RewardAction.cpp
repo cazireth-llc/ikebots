@@ -32,13 +32,18 @@ bool RewardAction::Execute(Event event)
             return true;
     }
 
+    Unit* mtar = AI_VALUE(Unit*, "master target");
+    if (mtar && Reward(itemId, mtar))
+       return true;    
+
+
     ai->TellError("Cannot talk to quest giver");
     return false;
 }
 
 bool RewardAction::Reward(uint32 itemId, Object* questGiver)
 {
-    QuestMenu& questMenu = bot->PlayerTalkClass->GetQuestMenu();
+    QuestMenu& questMenu = bot->GetPlayerMenu()->GetQuestMenu();
     for (uint32 iI = 0; iI < questMenu.MenuItemCount(); ++iI)
     {
         QuestMenuItem const& qItem = questMenu.GetItem(iI);
@@ -65,6 +70,7 @@ bool RewardAction::Reward(uint32 itemId, Object* questGiver)
 
                     ostringstream out; out << chat->formatItem(pRewardItem) << " rewarded";
                     ai->TellMaster(out);
+
                     return true;
                 }
             }

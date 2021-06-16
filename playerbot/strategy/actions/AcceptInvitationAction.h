@@ -35,9 +35,18 @@ namespace ai
             bot->GetSession()->HandleGroupAcceptOpcode(p);
 
             if (sRandomPlayerbotMgr.IsRandomBot(bot))
-                bot->GetPlayerbotAI()->SetMaster(inviter);
-
+                ai->SetMaster(inviter);
+            //else
+            //    sPlayerbotDbStore.Save(ai);
+            
             ai->ResetStrategies();
+            ai->ChangeStrategy("+follow,-lfg,-bg", BOT_STATE_NON_COMBAT);
+            if (!inviter->GetPlayerbotAI() && !bot->GetPlayerbotAI()->isRealPlayer())
+            {
+                ai->ChangeStrategy("-rpg,-travel,-grind", BOT_STATE_NON_COMBAT);
+            }
+            ai->Reset();
+
             ai->TellMaster("Hello");
             return true;
         }

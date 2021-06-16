@@ -13,8 +13,8 @@ bool SealTrigger::IsActive()
         !ai->HasAura("seal of vengeance", target) &&
 		!ai->HasAura("seal of righteousness", target) &&
 		!ai->HasAura("seal of light", target) &&
-		!ai->HasAura("seal of wisdom", target) &&
-		AI_VALUE2(bool, "combat", "self target");
+        !ai->HasAura("seal of wisdom", target) &&
+        AI_VALUE2(bool, "combat", "self target");
 }
 
 bool CrusaderAuraTrigger::IsActive()
@@ -27,5 +27,5 @@ bool BlessingTrigger::IsActive()
 {
     Unit* target = GetTarget();
     return SpellTrigger::IsActive() && !ai->HasAnyAuraOf(target,
-                    "blessing of might", "blessing of wisdom", "blessing of kings", "blessing of sanctuary", NULL);
+        "blessing of might", "blessing of wisdom", "blessing of kings", "blessing of sanctuary", NULL);
 }

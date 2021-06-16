@@ -11,7 +11,7 @@ using namespace ai;
 
 bool QueryItemUsageAction::Execute(Event event)
 {
-    if (!GetMaster())
+    if (!GetMaster() && !sPlayerbotAIConfig.randomBotSayWithoutMaster)
         return false;
 
     WorldPacket& data = event.getPacket();
@@ -45,6 +45,7 @@ bool QueryItemUsageAction::Execute(Event event)
             return false;
 
         ai->TellMaster(QueryItem(item, count, GetCount(item)));
+
         return true;
     }
 
@@ -77,10 +78,20 @@ uint32 QueryItemUsageAction::GetCount(ItemPrototype const *item)
 string QueryItemUsageAction::QueryItem(ItemPrototype const *item, uint32 count, uint32 total)
 {
     ostringstream out;
+#ifdef CMANGOS
     string usage = QueryItemUsage(item);
+#endif
+#ifdef MANGOS
+    bool usage = QueryItemUsage(item);
+#endif
     string quest = QueryQuestItem(item->ItemId);
     string price = QueryItemPrice(item);
+#ifdef CMANGOS
     if (usage.empty())
+#endif
+#ifdef MANGOS
+    if (!usage)
+#endif
         usage = (quest.empty() ? "Useless" : "Quest");
 
     out << chat->formatItem(item, count, total) << ": " << usage;
@@ -90,8 +101,12 @@ string QueryItemUsageAction::QueryItem(ItemPrototype const *item, uint32 count, 
         out << ", " << price;
     return out.str();
 }
-
+#ifdef CMANGOS
 string QueryItemUsageAction::QueryItemUsage(ItemPrototype const *item)
+#endif
+#ifdef MANGOS
+bool QueryItemUsageAction::QueryItemUsage(ItemPrototype const *item)
+#endif
 {
     ostringstream out; out << item->ItemId;
     ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", out.str());
@@ -109,6 +124,8 @@ string QueryItemUsageAction::QueryItemUsage(ItemPrototype const *item)
 		return "Guild task";
 	case ITEM_USAGE_DISENCHANT:
 		return "Disenchant";
+    case ITEM_USAGE_AMMO:
+        return "Ammunition";
 	}
 
     return "";

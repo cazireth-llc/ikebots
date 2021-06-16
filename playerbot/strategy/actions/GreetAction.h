@@ -2,6 +2,7 @@
 
 #include "../Action.h"
 #include "QuestAction.h"
+#include "UseItemAction.h"
 
 namespace ai
 {

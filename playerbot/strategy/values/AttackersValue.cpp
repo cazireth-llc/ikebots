@@ -14,6 +14,11 @@ list<ObjectGuid> AttackersValue::Calculate()
 {
     set<Unit*> targets;
 
+    list<ObjectGuid> result;
+
+    if (!ai->AllowActive(ALL_ACTIVITY))
+        return result;
+
     AddAttackersOf(bot, targets);
 
     Group* group = bot->GetGroup();
@@ -21,8 +26,7 @@ list<ObjectGuid> AttackersValue::Calculate()
         AddAttackersOf(group, targets);
 
     RemoveNonThreating(targets);
-
-    list<ObjectGuid> result;
+    
 	for (set<Unit*>::iterator i = targets.begin(); i != targets.end(); i++)
 		result.push_back((*i)->GetObjectGuid());
 
@@ -66,11 +70,24 @@ void AttackersValue::AddAttackersOf(Player* player, set<Unit*>& targets)
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(units, u_check);
     Cell::VisitAllObjects(player, searcher, sPlayerbotAIConfig.sightDistance);
 	for (list<Unit*>::iterator i = units.begin(); i != units.end(); i++)
-	{
-	    Unit* unit = *i;
-		targets.insert(unit);
-		unit->CallForAllControlledUnits(AddGuardiansHelper(units), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET | CONTROLLED_TOTEMS);
-	}
+    {
+		if (!player->GetGroup())
+		{
+			Unit* unit = *i;
+#ifdef CMANGOS
+			if (!unit->getThreatManager().getThreat(player))
+#endif
+#ifdef MANGOS
+			if (!unit->GetThreatManager().getThreat(player))
+#endif
+				continue;
+		}
+        {
+            Unit* unit = *i;
+            targets.insert(unit);
+            unit->CallForAllControlledUnits(AddGuardiansHelper(units), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET | CONTROLLED_TOTEMS);
+        }
+    }
 }
 
 void AttackersValue::RemoveNonThreating(set<Unit*>& targets)
@@ -78,7 +95,7 @@ void AttackersValue::RemoveNonThreating(set<Unit*>& targets)
     for(set<Unit *>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
         Unit* unit = *tIter;
-        if(!IsValidTarget(unit, bot))
+        if (!IsValidTarget(unit, bot))
         {
             set<Unit *>::iterator tIter2 = tIter;
             ++tIter;
@@ -92,40 +109,84 @@ void AttackersValue::RemoveNonThreating(set<Unit*>& targets)
 bool AttackersValue::IsPossibleTarget(Unit *attacker, Player *bot)
 {
     Creature *c = dynamic_cast<Creature*>(attacker);
+
+    bool rti = false;
+    if (attacker && bot->GetGroup())
+        rti = bot->GetGroup()->GetTargetIcon(7) == attacker->GetObjectGuid();
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    
+    bool leaderHasThreat = false;
+    if (attacker && bot->GetGroup() && ai->GetMaster())
+        leaderHasThreat = attacker->getThreatManager().getThreat(ai->GetMaster());
+
+    bool isMemberBotGroup = false;
+    if (bot->GetGroup() && ai->GetMaster() && ai->GetMaster()->GetPlayerbotAI() && !ai->GetMaster()->GetPlayerbotAI()->isRealPlayer())
+        isMemberBotGroup = true;
+
+
     return attacker &&
         attacker->IsInWorld() &&
         attacker->GetMapId() == bot->GetMapId() &&
         !sServerFacade.UnitIsDead(attacker) &&
         !attacker->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
+        !attacker->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
+#ifdef MANGOS
+        !attacker->IsInvisibleForAlive() &&
+#endif
+#ifdef CMANGOS
+        !attacker->isInvisibleForAlive() &&
+#endif
         !attacker->HasStealthAura() &&
         !attacker->HasInvisibilityAura() &&
-        !attacker->IsPolymorphed() &&
-        !attacker->IsStunned() &&
-        !sServerFacade.IsCharmed(attacker) &&
-        !sServerFacade.IsFeared(attacker) &&
-        !sServerFacade.IsInRoots(attacker) &&
+#ifdef CMANGOS
+        //!attacker->IsStunned() &&
+#endif
+#ifdef MANGOS
+        //!attacker->hasUnitState(UNIT_STAT_STUNNED) &&
+#endif
+        !((attacker->IsPolymorphed() ||
+        bot->GetPlayerbotAI()->HasAura("sap", attacker) ||
+        sServerFacade.IsCharmed(attacker) ||
+        sServerFacade.IsFeared(attacker)) && !rti) &&
+        //!sServerFacade.IsInRoots(attacker) &&
         !sServerFacade.IsFriendlyTo(attacker, bot) &&
         bot->IsWithinDistInMap(attacker, sPlayerbotAIConfig.sightDistance) &&
-        !(attacker->getLevel() == 1 && !sServerFacade.IsHostileTo(attacker, bot)) &&
-        !sPlayerbotAIConfig.IsInPvpProhibitedZone(attacker->GetAreaId()) &&
+        !(attacker->GetCreatureType() == CREATURE_TYPE_CRITTER) &&
+        !(sPlayerbotAIConfig.IsInPvpProhibitedZone(attacker->GetAreaId()) && (attacker->GetObjectGuid().IsPlayer() || attacker->GetObjectGuid().IsPet())) &&
         (!c || (
-                !c->IsInEvadeMode() &&
-                (!attacker->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED) || bot->IsTappedByMeOrMyGroup(c))
+#ifdef MANGOS
+            !c->IsInEvadeMode() &&
+#endif
+#ifdef CMANGOS
+            !c->GetCombatManager().IsInEvadeMode() &&
+#endif
+            (
+#ifdef CMANGOS
+                (!isMemberBotGroup && ai->HasStrategy("attack tagged", BOT_STATE_NON_COMBAT)) || leaderHasThreat || !c->HasLootRecipient() || c->IsTappedBy(bot)
+#endif
+#ifndef MANGOSBOT_TWO
+#ifdef MANGOS
+                !attacker->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED) || bot->IsTappedByMeOrMyGroup(c)
+#endif
+#endif
                 )
-        );
+            )
+            );
 }
 
 bool AttackersValue::IsValidTarget(Unit *attacker, Player *bot)
 {
-    return IsPossibleTarget(attacker, bot) &&
-            (sServerFacade.GetThreatManager(attacker).getCurrentVictim() || attacker->GetTargetGuid() || attacker->GetObjectGuid().IsPlayer() ||
-                    attacker->GetObjectGuid() == bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<ObjectGuid>("pull target")->Get());
+    return  IsPossibleTarget(attacker, bot) &&
+        (sServerFacade.GetThreatManager(attacker).getCurrentVictim() ||
+            attacker->GetGuidValue(UNIT_FIELD_TARGET) || attacker->GetObjectGuid().IsPlayer() ||
+            attacker->GetObjectGuid() == bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<ObjectGuid>("pull target")->Get());
 }
 
-bool PossibleAdsValue::Calculate()
+bool PossibleAddsValue::Calculate()
 {
     PlayerbotAI *ai = bot->GetPlayerbotAI();
-    list<ObjectGuid> possible = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("possible targets")->Get();
+    list<ObjectGuid> possible = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("possible targets no los")->Get();
     list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("attackers")->Get();
 
     for (list<ObjectGuid>::iterator i = possible.begin(); i != possible.end(); ++i)
@@ -134,7 +195,7 @@ bool PossibleAdsValue::Calculate()
         if (find(attackers.begin(), attackers.end(), guid) != attackers.end()) continue;
 
         Unit* add = ai->GetUnit(guid);
-        if (add && !add->GetTargetGuid() && !sServerFacade.GetThreatManager(add).getCurrentVictim() && sServerFacade.IsHostileTo(add, bot))
+        if (add && !add->GetGuidValue(UNIT_FIELD_TARGET) && !sServerFacade.GetThreatManager(add).getCurrentVictim() && sServerFacade.IsHostileTo(add, bot))
         {
             for (list<ObjectGuid>::iterator j = attackers.begin(); j != attackers.end(); ++j)
             {

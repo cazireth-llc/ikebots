@@ -138,7 +138,7 @@ namespace ai
 		CastBattleShoutAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "battle shout") {
 		    range = ATTACK_DISTANCE;
 		}
-		virtual bool isUseful() { return CastSpellAction::isUseful(); }
+        virtual bool isUseful() { return CastSpellAction::isUseful(); }
 	};
 
 	class CastDefensiveStanceAction : public CastBuffSpellAction {
@@ -151,8 +151,11 @@ namespace ai
 		CastBattleStanceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "battle stance") {}
 	};
 
-    BEGIN_RANGED_SPELL_ACTION(CastChargeAction, "charge")
-    END_SPELL_ACTION()
+    class CastChargeAction : public CastReachTargetSpellAction
+    {
+    public:
+        CastChargeAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "charge", 1.5f) {}
+    };
 
 	class CastDeathWishAction : public CastBuffSpellAction {
 	public:
@@ -194,6 +197,6 @@ namespace ai
     {
     public:
 	    CastBattleShoutTauntAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "battle shout") {}
-	    virtual bool isUseful() { return CastSpellAction::isUseful(); }
+        virtual bool isUseful() { return CastSpellAction::isUseful(); }
     };
 }

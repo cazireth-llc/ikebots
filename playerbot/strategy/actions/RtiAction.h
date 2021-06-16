@@ -14,7 +14,6 @@ namespace ai
 
     private:
         void AppendRti(ostringstream & out, string type);
-
     };
 
     class MarkRtiAction : public Action
@@ -25,4 +24,5 @@ namespace ai
 
         virtual bool Execute(Event event);
     };
+
 }

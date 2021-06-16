@@ -79,6 +79,7 @@ namespace ai
             creators["log"] = &ChatActionContext::log;
             creators["los"] = &ChatActionContext::los;
             creators["drop"] = &ChatActionContext::drop;
+            creators["clean quest log"] = &ChatActionContext::clean_quest_log;
             creators["share"] = &ChatActionContext::share;
             creators["query quest"] = &ChatActionContext::query_quest;
             creators["query item usage"] = &ChatActionContext::query_item_usage;
@@ -86,12 +87,14 @@ namespace ai
             creators["ss"] = &ChatActionContext::ss;
             creators["add all loot"] = &ChatActionContext::add_all_loot;
             creators["release"] = &ChatActionContext::release;
+            creators["repop"] = &ChatActionContext::repop;
             creators["teleport"] = &ChatActionContext::teleport;
             creators["taxi"] = &ChatActionContext::taxi;
             creators["repair"] = &ChatActionContext::repair;
             creators["use"] = &ChatActionContext::use;
             creators["item count"] = &ChatActionContext::item_count;
             creators["equip"] = &ChatActionContext::equip;
+            creators["equip upgrades"] = &ChatActionContext::equip_upgrades;
             creators["unequip"] = &ChatActionContext::unequip;
             creators["sell"] = &ChatActionContext::sell;
             creators["buy"] = &ChatActionContext::buy;
@@ -137,6 +140,7 @@ namespace ai
             creators["mail"] = &ChatActionContext::mail;
             creators["go"] = &ChatActionContext::go;
             creators["debug"] = &ChatActionContext::debug;
+            creators["cdebug"] = &ChatActionContext::debug;
             creators["cs"] = &ChatActionContext::cs;
             creators["wts"] = &ChatActionContext::wts;
             creators["hire"] = &ChatActionContext::hire;
@@ -191,6 +195,7 @@ namespace ai
         static Action* talents(PlayerbotAI* ai) { return new ChangeTalentsAction(ai); }
 
         static Action* equip(PlayerbotAI* ai) { return new EquipAction(ai); }
+        static Action* equip_upgrades(PlayerbotAI* ai) { return new EquipUpgradesAction(ai); }
         static Action* unequip(PlayerbotAI* ai) { return new UnequipAction(ai); }
         static Action* sell(PlayerbotAI* ai) { return new SellAction(ai); }
         static Action* buy(PlayerbotAI* ai) { return new BuyAction(ai); }
@@ -203,9 +208,11 @@ namespace ai
         static Action* taxi(PlayerbotAI* ai) { return new TaxiAction(ai); }
         static Action* teleport(PlayerbotAI* ai) { return new TeleportAction(ai); }
         static Action* release(PlayerbotAI* ai) { return new ReleaseSpiritAction(ai); }
+        static Action* repop(PlayerbotAI* ai) { return new RepopAction(ai); }
         static Action* query_item_usage(PlayerbotAI* ai) { return new QueryItemUsageAction(ai); }
         static Action* query_quest(PlayerbotAI* ai) { return new QueryQuestAction(ai); }
         static Action* drop(PlayerbotAI* ai) { return new DropQuestAction(ai); }
+        static Action* clean_quest_log(PlayerbotAI* ai) { return new CleanQuestLogAction(ai); }
         static Action* share(PlayerbotAI* ai) { return new ShareQuestAction(ai); }
         static Action* stats(PlayerbotAI* ai) { return new StatsAction(ai); }
         static Action* quests(PlayerbotAI* ai) { return new ListQuestsAction(ai); }

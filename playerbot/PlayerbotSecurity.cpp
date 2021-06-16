@@ -50,10 +50,13 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
 
         int botGS = (int)bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false);
         int fromGS = (int)bot->GetPlayerbotAI()->GetEquipGearScore(from, false, false);
-        if (botGS && bot->getLevel() > 15 && botGS > fromGS && (100 * (botGS - fromGS) / botGS) >= 12 * sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) / from->getLevel())
+        if (sPlayerbotAIConfig.gearscorecheck)
         {
-            if (reason) *reason = PLAYERBOT_DENY_GEARSCORE;
-            return PLAYERBOT_SECURITY_TALK;
+            if (botGS && bot->getLevel() > 15 && botGS > fromGS && (100 * (botGS - fromGS) / botGS) >= 12 * sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) / from->getLevel())
+            {
+                if (reason) *reason = PLAYERBOT_DENY_GEARSCORE;
+                return PLAYERBOT_SECURITY_TALK;
+            }
         }
 
         if (sServerFacade.UnitIsDead(bot))
@@ -91,6 +94,29 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
             }
         }
 
+        if (bot->GetPlayerbotAI()->HasStrategy("bg", BOT_STATE_NON_COMBAT))
+        {
+            if (!bot->GetGuildId() || bot->GetGuildId() != from->GetGuildId())
+            {
+                if (reason) *reason = PLAYERBOT_DENY_BG;
+                return PLAYERBOT_SECURITY_TALK;
+            }
+        }
+
+        if (bot->GetPlayerbotAI()->HasStrategy("lfg", BOT_STATE_NON_COMBAT))
+        {
+            if (!bot->GetGuildId() || bot->GetGuildId() != from->GetGuildId())
+            {
+#ifdef MANGOSBOT_ZERO
+                if (sLFGMgr.IsPlayerInQueue(bot->GetObjectGuid()))
+                {
+                    if (reason) *reason = PLAYERBOT_DENY_LFG;
+                    return PLAYERBOT_SECURITY_TALK;
+                }
+#endif
+            }
+        }
+
         if (reason) *reason = PLAYERBOT_DENY_INVITE;
         return PLAYERBOT_SECURITY_INVITE;
     }
@@ -105,7 +131,7 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
     if (realLevel >= level)
         return true;
 
-    if (silent || from->GetPlayerbotAI())
+    if (silent || (from->GetPlayerbotAI() && !from->GetPlayerbotAI()->isRealPlayer()))
         return false;
 
     Player* master = bot->GetPlayerbotAI()->GetMaster();
@@ -169,6 +195,12 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
         case PLAYERBOT_DENY_FULL_GROUP:
             out << "I am in a full group. Will do it later";
             break;
+        case PLAYERBOT_DENY_BG:
+            out << "I am in a queue for BG. Will do it later";
+            break;
+        case PLAYERBOT_DENY_LFG:
+            out << "I am in a queue for dungeon. Will do it later";
+            break;
         default:
             out << "I can't do that";
             break;
@@ -177,6 +209,9 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
     case PLAYERBOT_SECURITY_INVITE:
         out << "Invite me to your group first";
         break;
+        default:
+            out << "I can't do that";
+            break;
     }
 
     string text = out.str();

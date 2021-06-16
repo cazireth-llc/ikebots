@@ -144,6 +144,22 @@ namespace ai
         virtual uint8 Calculate();
     };
 
+    class DurabilityValue : public Uint8CalculatedValue
+    {
+    public:
+        DurabilityValue(PlayerbotAI* ai) : Uint8CalculatedValue(ai) {}
+
+        virtual uint8 Calculate();
+    };
+
+    class RepairCostValue : public Uint32CalculatedValue
+    {
+    public:
+        RepairCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai) {}
+
+        virtual uint32 Calculate();
+    };
+
     class SpeedValue : public Uint8CalculatedValue, public Qualified
     {
     public:
@@ -163,5 +179,11 @@ namespace ai
         IsInGroupValue(PlayerbotAI* ai) : BoolCalculatedValue(ai) {}
 
         virtual bool Calculate() { return bot->GetGroup(); }
+    };
+
+    class DeathCountValue : public ManualSetValue<uint32>
+    {
+    public:
+        DeathCountValue(PlayerbotAI* ai) : ManualSetValue<uint32>(ai, 0, "death_count") {}
     };
 }

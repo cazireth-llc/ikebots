@@ -2,6 +2,7 @@
 #include "../Trigger.h"
 #include "../../PlayerbotAIConfig.h"
 #include "../../ServerFacade.h"
+#include "../values/MoveTargetValue.h"
 
 namespace ai
 {
@@ -12,7 +13,7 @@ namespace ai
 		{
 			Unit* target = AI_VALUE(Unit*, "current target");
             return target &&
-                    sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "current target"), ai->GetRange("spell") / 2);
+                sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "current target"), (ai->GetRange("spell") / 2));
         }
     };
 
@@ -23,7 +24,7 @@ namespace ai
 		{
 			Unit* target = AI_VALUE(Unit*, "current target");
             return target &&
-                    sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "current target"), ai->GetRange("shoot") / 2);
+                sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "current target"), (ai->GetRange("shoot") / 2));
         }
     };
 
@@ -101,6 +102,28 @@ namespace ai
     class OutOfReactRangeTrigger : public FarFromMasterTrigger
     {
     public:
-        OutOfReactRangeTrigger(PlayerbotAI* ai) : FarFromMasterTrigger(ai, "out of react range", sPlayerbotAIConfig.reactDistance / 2, 10) {}
+        OutOfReactRangeTrigger(PlayerbotAI* ai) : FarFromMasterTrigger(ai, "out of react range", 40.0f, 5) {}
+    };
+
+    class HasContinueActionTrigger : public Trigger
+    {
+    public:
+        HasContinueActionTrigger(PlayerbotAI* ai) : Trigger(ai, "has continue action") {}
+
+        virtual bool IsActive()
+        {
+            return AI_VALUE(MoveTarget*, "move target")->getRelevance();
+        }
+    };
+
+    class ArrivedAtMoveTargetTrigger : public Trigger
+    {
+    public:
+        ArrivedAtMoveTargetTrigger(PlayerbotAI* ai) : Trigger(ai, "arrived at move target") {}
+
+        virtual bool IsActive()
+        {
+            return AI_VALUE(MoveTarget*, "move target")->getRelevance() && AI_VALUE(MoveTarget*, "move target")->isInRange(bot);
+        }
     };
 }

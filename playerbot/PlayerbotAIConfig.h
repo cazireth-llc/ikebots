@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.h"
+#include "Talentspec.h"
 
 class Player;
 class PlayerbotMgr;
@@ -20,7 +21,7 @@ public:
     bool Initialize();
     bool IsInRandomAccountList(uint32 id);
     bool IsInRandomQuestItemList(uint32 id);
-    bool IsInPvpProhibitedZone(uint32 id);
+	bool IsInPvpProhibitedZone(uint32 id);
 
     bool enabled;
     bool allowGuildBots;
@@ -34,7 +35,6 @@ public:
 
     uint32 openGoSpell;
     bool randomBotAutologin;
-    bool randomBotImmersive;
     bool botAutologin;
     std::string randomBotMapsAsString;
     std::vector<uint32> randomBotMaps;
@@ -56,6 +56,8 @@ public:
     uint32 randomBotsPerInterval;
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     bool randomBotJoinLfg;
+    bool randomBotJoinBG;
+    uint32 randomBotBracketCount;
     bool randomBotLoginAtStartup;
     uint32 randomBotTeleLevel;
     bool logInGroupOnly, logValuesPerTick;
@@ -65,24 +67,70 @@ public:
     std::string randomBotCombatStrategies, randomBotNonCombatStrategies;
     uint32 randomBotMinLevel, randomBotMaxLevel;
     float randomChangeMultiplier;
-    uint32 specProbability[MAX_CLASSES][3];
+    uint32 specProbability[MAX_CLASSES][10];
+    string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
+    ClassSpecs classSpecs[MAX_CLASSES];
     std::string commandPrefix, commandSeparator;
     std::string randomBotAccountPrefix;
     uint32 randomBotAccountCount;
     bool deleteRandomBotAccounts;
     uint32 randomBotGuildCount;
     bool deleteRandomBotGuilds;
+    uint32 randomBotArenaTeamCount;
+    bool deleteRandomBotArenaTeams;
+    std::list<uint32> randomBotArenaTeams;
+	bool RandombotsWalkingRPG;
+	bool RandombotsWalkingRPGInDoors;
     std::list<uint32> randomBotGuilds;
-    std::list<uint32> pvpProhibitedZoneIds;
+	std::list<uint32> pvpProhibitedZoneIds;
+    bool enableGreet;
+    bool randomBotShowHelmet;
+    bool randomBotShowCloak;
+    bool disableRandomLevels;
+    bool gearscorecheck;
+	bool randomBotPreQuests;
+    uint32 playerbotsXPrate;
+    uint32 botActiveAlone;
+    uint32 minEnchantingBotLevel;
+    uint32 randombotStartingLevel;
+    bool randomBotSayWithoutMaster;
+    bool randomBotGroupNearby;
 
     bool guildTaskEnabled;
     uint32 minGuildTaskChangeTime, maxGuildTaskChangeTime;
     uint32 minGuildTaskAdvertisementTime, maxGuildTaskAdvertisementTime;
     uint32 minGuildTaskRewardTime, maxGuildTaskRewardTime;
     uint32 guildTaskAdvertCleanupTime;
-    uint32 guildTaskKillTaskDistance;
 
     uint32 iterationsPerTick;
+
+    std::string autoPickReward;
+    bool autoEquipUpgradeLoot;
+    bool syncQuestWithPlayer;
+    bool syncQuestForPlayer;
+    std::string autoTrainSpells;
+    std::string autoPickTalents;
+    bool autoLearnTrainerSpells;
+    bool autoLearnQuestSpells;
+    bool autoDoQuests;
+    bool syncLevelWithPlayers;
+    uint32 tweakValue; //Debugging config
+
+    std::mutex m_logMtx;
+
+    std::list<string> allowedLogFiles;
+
+    std::unordered_map <std::string, std::pair<FILE*, bool>> logFiles;
+
+    struct worldBuff{
+        uint32 spellId;
+        uint32 factionId = 0;
+        uint32 classId = 0;
+        uint32 minLevel = 0;
+        uint32 maxLevel = 0;
+    };
+
+    vector<worldBuff> worldBuffs;
 
     int commandServerPort;
     bool perfMonEnabled;
@@ -90,6 +138,14 @@ public:
     std::string GetValue(std::string name);
     void SetValue(std::string name, std::string value);
 
+    void loadWorldBuf(Config* config, uint32 factionId, uint32 classId, uint32 minLevel, uint32 maxLevel);
+
+    std::string GetTimestampStr();
+
+    bool hasLog(string fileName) { return std::find(allowedLogFiles.begin(), allowedLogFiles.end(), fileName) != allowedLogFiles.end(); };
+    bool openLog(string fileName, char const* mode = "a");
+    bool isLogOpen(string fileName) { auto it = logFiles.find(fileName); return it != logFiles.end() && it->second.second;}
+    void log(string fileName, const char* str, ...);
 private:
     Config config;
 };

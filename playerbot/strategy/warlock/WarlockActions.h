@@ -94,6 +94,12 @@ namespace ai
 		CastSummonImpAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon imp") {}
 	};
 
+    class CastSummonSuccubusAction : public CastBuffSpellAction
+    {
+    public:
+        CastSummonSuccubusAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon succubus") {}
+    };
+
 	class CastCreateHealthstoneAction : public CastBuffSpellAction
 	{
 	public:
@@ -168,7 +174,7 @@ namespace ai
         CastFearOnCcAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "fear on cc") {}
         virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("cc target", "fear"); }
         virtual bool Execute(Event event) { return ai->CastSpell("fear", GetTarget()); }
-        virtual bool isPossible() { return ai->CanCastSpell("fear", GetTarget()); }
+        virtual bool isPossible() { return ai->CanCastSpell("fear", GetTarget(), true); }
         virtual bool isUseful() { return true; }
     };
 
@@ -197,4 +203,5 @@ namespace ai
     public:
         CastSiphonLifeOnAttackerAction(PlayerbotAI* ai) : CastDebuffSpellOnAttackerAction(ai, "siphon life") {}
     };
+
 }

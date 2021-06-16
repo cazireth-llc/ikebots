@@ -31,7 +31,7 @@ namespace ai
             if (qualifier.find("position_") == 0)
             {
                 string position = qualifier.substr(9);
-                ai::Position pos = context->GetValue<ai::PositionMap&>("position")->Get()[position];
+                ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[position];
                 if (!pos.isSet()) return 0.0f;
                 if (ai->GetBot()->GetMapId() != pos.mapId) return 0.0f;
                 return sServerFacade.GetDistance2d(ai->GetBot(), pos.x, pos.y);
@@ -42,6 +42,18 @@ namespace ai
             {
                 ObjectGuid rpgTarget = AI_VALUE(ObjectGuid, qualifier);
                 target = ai->GetUnit(rpgTarget);
+
+                if (!target)
+                {
+                    GameObject* go = ai->GetGameObject(rpgTarget);
+                    if (go)
+                        return sServerFacade.GetDistance2d(ai->GetBot(), go);
+                }
+            }
+            else if (qualifier == "travel target")
+            {
+                TravelTarget * travelTarget = AI_VALUE(TravelTarget *, qualifier);
+                return travelTarget->distance(ai->GetBot());
             }
             else if (qualifier == "current target")
             {
@@ -52,7 +64,7 @@ namespace ai
             else
             {
                 target = AI_VALUE(Unit*, qualifier);
-                if (target && target == GetMaster())
+                if (target && target == GetMaster() && target != bot)
                 {
                     Formation* formation = AI_VALUE(Formation*, "formation");
                     WorldLocation loc = formation->GetLocation();
@@ -71,8 +83,8 @@ namespace ai
     };
 
     class InsideTargetValue : public BoolCalculatedValue, public Qualified
-	{
-	public:
+    {
+    public:
         InsideTargetValue(PlayerbotAI* ai) : BoolCalculatedValue(ai) {}
 
     public:

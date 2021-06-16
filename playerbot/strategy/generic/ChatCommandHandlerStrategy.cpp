@@ -49,6 +49,14 @@ void ChatCommandHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("item count", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "items",
+        NextAction::array(0, new NextAction("item count", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "inv",
+        NextAction::array(0, new NextAction("item count", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "e",
         NextAction::array(0, new NextAction("equip", relevance), NULL)));
 
@@ -186,6 +194,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("outfit");
     supported.push_back("go");
     supported.push_back("debug");
+    supported.push_back("cdebug");
     supported.push_back("cs");
     supported.push_back("wts");
     supported.push_back("hire");

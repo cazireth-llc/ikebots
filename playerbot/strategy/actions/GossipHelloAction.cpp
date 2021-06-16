@@ -51,7 +51,7 @@ bool GossipHelloAction::Execute(Event event)
 
         TellGossipMenus();
 	}
-	else if (!bot->PlayerTalkClass)
+	else if (!bot->GetPlayerMenu())
 	{
 	    ai->TellError("I need to talk first");
 	    return false;
@@ -87,11 +87,11 @@ void GossipHelloAction::TellGossipText(uint32 textId)
 
 void GossipHelloAction::TellGossipMenus()
 {
-    if (!bot->PlayerTalkClass)
+    if (!bot->GetPlayerMenu())
         return;
 
     Creature *pCreature = bot->GetNPCIfCanInteractWith(GetMaster()->GetSelectionGuid(), UNIT_NPC_FLAG_NONE);
-    GossipMenu& menu = bot->PlayerTalkClass->GetGossipMenu();
+    GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
     if (pCreature)
     {
         uint32 textId = bot->GetGossipTextId(menu.GetMenuId(), pCreature);
@@ -109,7 +109,7 @@ void GossipHelloAction::TellGossipMenus()
 
 bool GossipHelloAction::ProcessGossip(int menuToSelect)
 {
-    GossipMenu& menu = bot->PlayerTalkClass->GetGossipMenu();
+    GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
     if (menuToSelect != -1 && menuToSelect >= menu.MenuItemCount())
     {
         ai->TellError("Unknown gossip option");
@@ -121,8 +121,7 @@ bool GossipHelloAction::ProcessGossip(int menuToSelect)
     p << GetMaster()->GetSelectionGuid();
 #ifdef MANGOSBOT_ZERO
     p << menuToSelect;
-#endif
-#ifdef MANGOSBOT_ONE
+#else
     p << menu.GetMenuId() << menuToSelect;
 #endif
     p << code;

@@ -58,6 +58,10 @@ void GenericMageNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trigger
 	triggers.push_back(new TriggerNode(
 		"no food",
 		NextAction::array(0, new NextAction("conjure food", 15.0f), NULL)));
+
+   triggers.push_back(new TriggerNode(
+      "often",
+      NextAction::array(0, new NextAction("apply oil", 1.0f), NULL)));
 }
 
 void MageBuffManaStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -88,3 +92,4 @@ void MageBuffStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "give food",
         NextAction::array(0, new NextAction("give food", 13.0f), NULL)));
 }
+

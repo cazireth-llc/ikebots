@@ -13,6 +13,14 @@ void WorldPacketHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("accept invitation", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "uninvite",
+        NextAction::array(0, new NextAction("uninvite", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "uninvite guid",
+        NextAction::array(0, new NextAction("uninvite", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "group set leader",
         NextAction::array(0, new NextAction("leader", relevance), NULL)));
 
@@ -49,7 +57,7 @@ void WorldPacketHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "trade status",
-        NextAction::array(0, new NextAction("accept trade", relevance), NULL)));
+        NextAction::array(0, new NextAction("accept trade", relevance), new NextAction("equip upgrades", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "area trigger",
@@ -65,7 +73,7 @@ void WorldPacketHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "item push result",
-        NextAction::array(0, new NextAction("query item usage", relevance), NULL)));
+        NextAction::array(0, new NextAction("query item usage", relevance), new NextAction("equip upgrades", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "ready check finished",
@@ -80,13 +88,48 @@ void WorldPacketHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("guild accept", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "seldom",
-        NextAction::array(0, new NextAction("lfg leave", relevance), NULL)));
+        "petition offer",
+        NextAction::array(0, new NextAction("petition sign", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "no non bot players around",
-        NextAction::array(0, new NextAction("delay", relevance), NULL)));
+        "lfg proposal",
+        NextAction::array(0, new NextAction("lfg accept", relevance), NULL)));
 
+    triggers.push_back(new TriggerNode(
+        "lfg proposal active",
+        NextAction::array(0, new NextAction("lfg accept", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "arena team invite",
+        NextAction::array(0, new NextAction("arena team accept", relevance), NULL)));
+
+    /*triggers.push_back(new TriggerNode(
+        "no non bot players around",
+        NextAction::array(0, new NextAction("delay", relevance), NULL)));*/
+
+    triggers.push_back(new TriggerNode(
+        "bg status",
+        NextAction::array(0, new NextAction("bg status", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "xpgain",
+        NextAction::array(0, new NextAction("xp gain", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "levelup",
+        NextAction::array(0, new NextAction("auto talents", relevance), new NextAction("auto learn spell", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "see spell",
+        NextAction::array(0, new NextAction("see spell", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "release spirit",
+        NextAction::array(0, new NextAction("release", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "revive from corpse",
+        NextAction::array(0, new NextAction("revive from corpse", relevance), NULL)));
 }
 
 WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai)
@@ -101,6 +144,7 @@ WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("lfg teleport");
     supported.push_back("random bot update");
     supported.push_back("inventory change failure");
+    supported.push_back("bg status");
 }
 
 

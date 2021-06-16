@@ -26,29 +26,38 @@ Unit* PartyMemberValue::FindPartyMember(list<Player*>* party, FindPlayerPredicat
     return NULL;
 }
 
-Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate)
+Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup)
 {
     Player* master = GetMaster();
-    list<ObjectGuid> nearestPlayers = AI_VALUE(list<ObjectGuid>, "nearest friendly players");
+    list<ObjectGuid> nearestPlayers;
+    if(ai->AllowActive(OUT_OF_PARTY_ACTIVITY))
+        nearestPlayers = AI_VALUE(list<ObjectGuid>, "nearest friendly players");
+
+    list<ObjectGuid> nearestGroupPlayers;
 
     Group* group = bot->GetGroup();
     if (group)
     {
         for (GroupReference *ref = group->GetFirstMember(); ref; ref = ref->next())
         {
-            if( ref->getSource() != bot)
+            if (ref->getSource() != bot)
             {
                 if (ref->getSubGroup() != bot->GetSubGroup())
                 {
-                    nearestPlayers.push_back(ref->getSource()->GetObjectGuid());
+                    nearestGroupPlayers.push_back(ref->getSource()->GetObjectGuid());
                 }
                 else
                 {
-                    nearestPlayers.push_front(ref->getSource()->GetObjectGuid());
+                    nearestGroupPlayers.push_front(ref->getSource()->GetObjectGuid());
                 }
             }
         }
     }
+    
+    if (!ignoreOutOfGroup && !nearestPlayers.empty())
+        nearestGroupPlayers.insert(nearestGroupPlayers.end(), nearestPlayers.begin(), nearestPlayers.end());
+
+    nearestPlayers = nearestGroupPlayers;
 
     list<Player*> healers, tanks, others, masters;
     if (master) masters.push_back(master);

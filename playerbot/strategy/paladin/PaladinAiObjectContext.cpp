@@ -26,16 +26,16 @@ namespace ai
                 creators["nc"] = &paladin::StrategyFactoryInternal::nc;
                 creators["cure"] = &paladin::StrategyFactoryInternal::cure;
                 creators["boost"] = &paladin::StrategyFactoryInternal::boost;
-                creators["cc"] = &paladin::StrategyFactoryInternal::cc;
                 creators["bthreat"] = &paladin::StrategyFactoryInternal::bthreat;
+                creators["cc"] = &paladin::StrategyFactoryInternal::cc;
             }
 
         private:
             static Strategy* nc(PlayerbotAI* ai) { return new GenericPaladinNonCombatStrategy(ai); }
             static Strategy* cure(PlayerbotAI* ai) { return new PaladinCureStrategy(ai); }
             static Strategy* boost(PlayerbotAI* ai) { return new PaladinBoostStrategy(ai); }
-            static Strategy* cc(PlayerbotAI* ai) { return new PaladinCcStrategy(ai); }
             static Strategy* bthreat(PlayerbotAI* ai) { return new PaladinBuffThreatStrategy(ai); }
+            static Strategy* cc(PlayerbotAI* ai) { return new PaladinCcStrategy(ai); }
         };
 
         class ResistanceStrategyFactoryInternal : public NamedObjectContext<Strategy>
@@ -66,6 +66,7 @@ namespace ai
                 creators["bhealth"] = &paladin::BuffStrategyFactoryInternal::bhealth;
                 creators["bmana"] = &paladin::BuffStrategyFactoryInternal::bmana;
                 creators["bdps"] = &paladin::BuffStrategyFactoryInternal::bdps;
+                creators["bspeed"] = &paladin::BuffStrategyFactoryInternal::bspeed;
                 creators["bstats"] = &paladin::BuffStrategyFactoryInternal::bstats;
             }
 
@@ -73,6 +74,7 @@ namespace ai
             static Strategy* bhealth(PlayerbotAI* ai) { return new PaladinBuffHealthStrategy(ai); }
             static Strategy* bmana(PlayerbotAI* ai) { return new PaladinBuffManaStrategy(ai); }
             static Strategy* bdps(PlayerbotAI* ai) { return new PaladinBuffDpsStrategy(ai); }
+            static Strategy* bspeed(PlayerbotAI* ai) { return new PaladinBuffSpeedStrategy(ai); }
             static Strategy* bstats(PlayerbotAI* ai) { return new PaladinBuffStatsStrategy(ai); }
         };
 

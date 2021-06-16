@@ -27,7 +27,7 @@ void LoadSet(string value, T &res)
 
 bool AhBotConfig::Initialize()
 {
-    if (!config.SetSource("ahbot.conf"))
+    if (!config.SetSource(SYSCONFDIR"ahbot.conf"))
     {
         sLog.outString("AhBot is Disabled. Unable to open configuration file ahbot.conf");
         return false;
@@ -39,7 +39,7 @@ bool AhBotConfig::Initialize()
         sLog.outString("AhBot is Disabled in ahbot.conf");
 
     guid = (uint64)config.GetIntDefault("AhBot.GUID", 0);
-    updateInterval = config.GetIntDefault("AhBot.UpdateIntervalInSeconds", 300);
+    updateInterval = config.GetIntDefault("AhBot.UpdateIntervalInSeconds", 900);
     historyDays = config.GetIntDefault("AhBot.History.Days", 30);
     itemBuyMinInterval = config.GetIntDefault("AhBot.ItemBuyMinInterval", 600);
     itemBuyMaxInterval = config.GetIntDefault("AhBot.ItemBuyMaxInterval", 7200);

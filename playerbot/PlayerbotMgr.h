@@ -24,6 +24,7 @@ public:
 	void HandlePlayerBotLoginCallback(QueryResult * dummy, SqlQueryHolder * holder);
 
     void LogoutPlayerBot(uint64 guid);
+    void DisablePlayerBot(uint64 guid);
     Player* GetPlayerBot (uint64 guid) const;
     PlayerBotMap::const_iterator GetPlayerBotsBegin() const { return playerBots.begin(); }
     PlayerBotMap::const_iterator GetPlayerBotsEnd()   const { return playerBots.end();   }
@@ -35,7 +36,7 @@ public:
     void OnBotLogin(Player * const bot);
 
     list<string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
-    string ProcessBotCommand(string cmd, ObjectGuid guid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
+    string ProcessBotCommand(string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
     uint32 GetAccountId(string name);
     string ListBots(Player* master);
 

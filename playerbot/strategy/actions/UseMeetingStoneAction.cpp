@@ -38,7 +38,7 @@ bool UseMeetingStoneAction::Execute(Event event)
 
     Map* map = master->GetMap();
     if (!map)
-        return NULL;
+        return false;
 
     GameObject *gameObject = map->GetGameObject(guid);
     if (!gameObject)
@@ -76,7 +76,7 @@ bool SummonAction::Execute(Event event)
     if (!master)
         return false;
 
-    if (master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+    if (master->GetSession()->GetSecurity() >= SEC_PLAYER)
         return Teleport(master, bot);
 
     if (SummonUsingGos(master, bot) || SummonUsingNpcs(master, bot))

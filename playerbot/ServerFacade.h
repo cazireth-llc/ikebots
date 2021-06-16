@@ -2,6 +2,15 @@
 #define _ServerFacade_H
 
 #include "Common.h"
+#include "Unit.h"
+#include "Player.h"
+#ifdef CMANGOS
+#include "Entities/GameObject.h"
+#endif
+#ifdef MANGOS
+#include "Object/GameObject.h"
+#endif
+#include "BattleGroundMgr.h"
 #include "PlayerbotAIBase.h"
 #include "PlayerbotAIConfig.h"
 
@@ -25,7 +34,7 @@ class ServerFacade
             return unit->IsDead();
 #endif
 #ifdef CMANGOS
-            return unit->isDead();
+            return unit->IsDead();
 #endif
         }
 
@@ -36,10 +45,14 @@ class ServerFacade
         DeathState GetDeathState(Unit *unit)
         {
 #ifdef MANGOS
+#ifndef MANGOSBOT_TWO
             return unit->GetDeathState();
+#else
+            return unit->getDeathState();
+#endif
 #endif
 #ifdef CMANGOS
-            return unit->getDeathState();
+            return unit->GetDeathState();
 #endif
         }
 
@@ -59,7 +72,7 @@ class ServerFacade
             return unit->IsAlive();
 #endif
 #ifdef CMANGOS
-            return unit->isAlive();
+            return unit->IsAlive();
 #endif
         }
 
@@ -71,7 +84,7 @@ class ServerFacade
             return unit->IsInCombat();
 #endif
 #ifdef CMANGOS
-            return unit->isInCombat();
+            return unit->IsInCombat();
 #endif
         }
 
@@ -108,7 +121,11 @@ class ServerFacade
         bool IsFeared(Unit *unit)
         {
 #ifdef MANGOS
+#ifndef MANGOSBOT_TWO
             return unit->IsFeared();
+#else
+            return unit->isFeared();
+#endif
 #endif
 #ifdef CMANGOS
             return unit->isFeared();
@@ -208,13 +225,45 @@ class ServerFacade
         void SetFacingTo(Player* bot, WorldObject* wo, bool force = false);
 
         bool IsFriendlyTo(Unit* bot, Unit* to);
+        bool IsFriendlyTo(WorldObject* bot, Unit* to);
         bool IsHostileTo(Unit* bot, Unit* to);
+        bool IsHostileTo(WorldObject* bot, Unit* to);
 
         bool IsSpellReady(Player* bot, uint32 spell);
 
         bool IsUnderwater(Unit *unit);
         FactionTemplateEntry const* GetFactionTemplateEntry(Unit *unit);
         Unit* GetChaseTarget(Unit* target);
+
+        BattleGroundTypeId BgTemplateId(BattleGroundQueueTypeId queueTypeId)
+        {
+#ifdef MANGOS
+            return sBattleGroundMgr.BGTemplateId(queueTypeId);
+#endif
+#ifdef CMANGOS
+            return sBattleGroundMgr.BgTemplateId(queueTypeId);
+#endif
+        }
+#ifndef MANGOSBOT_ZERO
+        ArenaType BgArenaType(BattleGroundQueueTypeId queueTypeId)
+        {
+#ifdef MANGOS
+            return sBattleGroundMgr.BGArenaType(queueTypeId);
+#endif
+#ifdef CMANGOS
+            return sBattleGroundMgr.BgArenaType(queueTypeId);
+#endif
+        }
+#endif
+        BattleGroundQueue& bgQueue(BattleGroundQueueTypeId queueTypeId)
+        {
+#ifdef MANGOS
+            return sBattleGroundMgr.m_BattleGroundQueues[queueTypeId];
+#endif
+#ifdef CMANGOS
+            return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
+#endif
+        }
 };
 
 #define sServerFacade ServerFacade::instance()

@@ -145,7 +145,7 @@ void SuggestWhatToDoAction::grindMaterials()
     if (bot->getLevel() <= 5)
         return;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT distinct category, multiplier FROM ahbot_category where category not in ('other', 'quest', 'trade', 'reagent') and multiplier > 3 order by multiplier desc limit 10");
+    QueryResult *result = PlayerbotDatabase.PQuery("SELECT distinct category, multiplier FROM ahbot_category where category not in ('other', 'quest', 'trade', 'reagent') and multiplier > 3 order by multiplier desc limit 10");
     if (!result)
         return;
 
@@ -169,7 +169,7 @@ void SuggestWhatToDoAction::grindMaterials()
                 if (name == category->GetName())
                 {
                     string item = category->GetLabel();
-                    transform(item.begin(), item.end(), item.begin(), tolower);
+                    transform(item.begin(), item.end(), item.begin(), ::tolower);
                     ostringstream itemout;
                     itemout << "|c0000b000" << item << "|r";
                     item = itemout.str();
@@ -205,7 +205,7 @@ void SuggestWhatToDoAction::grindReputation()
         factions["Gadgetzan"] = 50;
         factions["Ratchet"] = 20;
 
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_ZERO
         factions["Ashtongue Deathsworn"] = 70;
         factions["Cenarion Expedition"] = 62;
         factions["The Consortium"] = 65;
@@ -291,7 +291,7 @@ void SuggestWhatToDoAction::spam(string msg, uint32 channelId)
             if (ChannelMgr* cMgr = channelMgr(bot->GetTeam()))
             {
                 if (Channel* chn = cMgr->GetJoinChannel(channelName
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_ZERO
                     , channel->ChannelID
 #endif
                 ))
@@ -348,9 +348,11 @@ bool SuggestTradeAction::Execute(Event event)
         return false;
 
     uint32 quality = urand(0, 100);
-    if (quality > 90)
+    if (quality > 95)
+        quality = ITEM_QUALITY_LEGENDARY;
+    else if (quality > 90)
         quality = ITEM_QUALITY_EPIC;
-    else if (quality >75)
+    else if (quality > 75)
         quality = ITEM_QUALITY_RARE;
     else if (quality > 50)
         quality = ITEM_QUALITY_UNCOMMON;
